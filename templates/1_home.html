@@ -9,7 +9,7 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="/static/css/doctor.css">
 </head>
-
+<body onload="init()">
 <nav class="navbar navbar-inverse">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -30,7 +30,7 @@
 
   <div class="panel-body">
 
-    <img src='/static/images/doctor.jpg' style='position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:-1;'>
+    <!-- <img src='/static/images/doctor.jpg' style='position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:-1;'> -->
 
 <div class="panel panel-primary">
 <div class="panel-heading">
@@ -88,40 +88,34 @@
   </table>
 </div>
 <div id="menu1" class="container tab-pane fade"><br>
-  <h1><b><u>Patients</u></b></h1>
+  <h1><b><u>In-Patients</u></b></h1>
   <br>
   <input class="form-control" id="myInput2" type="text" placeholder="Search..">
   <br>
   <table class="container">
     <thead>
       <tr>
-        <th><h1>Name</h1></th>
-        <th><h1>Contact No.</h1></th>
-        <th><h1>Remarks</h1></th>
+        <th><h1>Patient ID</h1></th>
+        <th><h1>Patient Name</h1></th>
+        <th><h1>Date</h1></th>
+        <th><h1>Time</h1></th>
+        <th><h1>Nurse ID</h1></th>
+        <th><h1>Nurse Name</h1></th>
+        <th><h1>Ward</h1></th>
       </tr>
     </thead>
     <tbody id="myPatient">
-      <tr>
-        <td>John</td>
-        <td>9830012345</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>John</td>
-        <td>9830012345</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>John</td>
-        <td>9830012345</td>
-        <td></td>
-      </tr>
-      <tr>
-        <td>John</td>
-        <td>9830012345</td>
-        <td></td>
-      </tr>
-
+      {% for patient in inpatients %}
+        <tr>
+          <td>{{patient["patient_id"]}}</td>
+          <td>{{patient["patient_name"]}}</td>
+          <td>{{patient["date"]}}</td>
+          <td>{{patient["time"]}}</td>
+          <td>{{patient["nurse_id"]}}</td>
+          <td>{{patient["nurse_name"]}}</td>
+          <td>{{patient["ward_number"]}}</td>
+        </tr>
+      {% endfor %}
     </tbody>
   </table>
     </div>

@@ -1,0 +1,70 @@
+<html>
+    <head>
+        <title>
+            Admit Status
+        </title>
+        <meta charset="utf-8">
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <link rel="stylesheet" href="/static/css/admit_status.css">
+    </head>
+    <body>
+            <div class="container">
+                    <nav class="navbar navbar-inverse">
+                            <div class="container-fluid">
+                                <div class="navbar-header">
+                                <a class="navbar-brand" href="#">Admin Arena</a>
+                                </div>
+                                <ul class="nav navbar-nav">
+                                <li class="active"><a href="/home">Home</a></li>
+                                <!-- <li><a href="#">Page 1</a></li>
+                                <li><a href="#">Page 2</a></li> -->
+                                </ul>
+                                <ul class="nav navbar-nav navbar-right">
+                                <li><a href="/logout"><span class="glyphicon glyphicon-user"></span> Log out</a></li>
+                                </ul>
+                            </div>
+                        </nav>
+                    
+        <div class='card-wrapper'>
+        <div class='card' data-toggle-class='flipped'>
+            <div class='card-front'>
+            <div class='layer'>
+                <h1>{{status}}</h1>
+                <div class='corner'></div>
+                <div class='corner'></div>
+                <div class='corner'></div>
+                <div class='corner'></div>
+            </div>
+            </div>
+            <div class='card-back'>
+            <div class='layer'>
+                <div class='top'>
+                    <h1>****{{doctor_name}}****</h1>
+                </div>
+                {% if status == "Success" %}
+                    <div class='bottom'>
+                        <h1>
+                            Patient:
+                            <a href='#'>{{patient_name}}</a>
+                        </h1>
+                        <h1>
+                            Nurse:
+                            <a href='#' target='_blank'>{{nurse_name}}</a>
+                        </h1>
+                        <h1>
+                            Ward Info:
+                            <a href='#' target='_blank'>{{ward_num}}</a>
+                        </h1>
+                    </div>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        <script src="/static/js/admit_status.js"></script>      
+    </body>
+</html>

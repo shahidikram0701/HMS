@@ -22,9 +22,9 @@
 <div class="panel panel-primary">
     <div class="panel-heading">
          <div class="panel-title pull-left">
-             Dr. abc
+             {{doctor_name}}
          </div>
-        <div class="panel-title pull-right">Patient xyz</div>
+        <div class="panel-title pull-right">{{patient_name}}</div>
         <div class="clearfix"></div>
     </div>
 </div>
@@ -112,24 +112,29 @@
 <br/>
 <br/>
 <div class="jumbotron" align="center">
-<form>
+<form action = "/doctor_patient" method="POST">
+<input class="form-control" type="text" name="patient_id" value = "{{patient_id}}" style="display:none">
+<input class="form-control" type="text" name="time" value = "{{time}}" style="display:none">
 <div class="form-group">
   <label for="comment">Doctor's Remarks:</label>
-  <textarea class="form-control" rows="10"  id="comment"></textarea>
+  <textarea class="form-control" rows="10"  id="comment" name="comment"></textarea>
 </div>
-<br>
-<input type="submit" value="submit">
-</form>
-</div>
+<br/>
 
 <div>
 <div class="col-sm-6" align="center">
-<button type="button" class="btn btn-lg btn-primary">Admit Patient</button>
+<button type="submit" name="submit_type" value="admit" class="btn btn-lg btn-primary">Admit Patient</button>
 </div>
 <div class="col-sm-6" align="center">
-<button type="button" class="btn btn-lg btn-primary">Done</button>
+<button type="submit" name="submit_type" value="done" class="btn btn-lg btn-primary">Done</button>
 </div>
 </div>
+<br/>
+<br/>
+</form>
+</div>
+
+
 </div>
 </div>
 </div>

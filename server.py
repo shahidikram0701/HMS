@@ -8,12 +8,16 @@ from cryptography.fernet import Fernet
 import datetime
 import random
 import collections
+import pickle
 
 key = b'5HFFdBeSChtl1oWaEWwDhTi5Cr7s4LohO5W2zIngmHU='
 cipher_suite = Fernet(key)
 
+
 app = Flask(__name__)
 app.secret_key = os.urandom(24) # for session
+# app.config["REDIS_URL"] = "redis://localhost"
+# app.register_blueprint(sse, url_prefix='/stream')
 CORS(app)
 
 client = MongoClient('localhost', 27017)
@@ -158,10 +162,20 @@ def sorted_appointments_name(_id):
 	collection = db["users"]
 	doc = collection.find_one({"_id": _id})
 	date = datetime.datetime.now().date().strftime("%m/%d/%Y")
-	appointments = collections.OrderedDict(sorted(doc["appointments"][date].items()))
-	
-	return appointments, doc["name"]
-	
+	try:
+		appointments = collections.OrderedDict(sorted(doc["appointments"][date].items()))
+		return appointments, doc["name"]
+	except:
+		return {}, doc["name"]
+def save_pickle(filename, obj):
+	with open(filename + '.pickle', 'wb') as handle:
+		pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def get_pickle(filename):
+	with open(filename + ".pickle", 'rb') as handle:
+		obj = pickle.load(handle)
+	return obj
+
 
 @app.route('/')
 def homepage():
@@ -254,8 +268,15 @@ def login():
 				else:
 					if(int(docs["flag"]) == 1):
 						appointments, name = sorted_appointments_name(docs["_id"])
-						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", name=name, appointments=appointments, date=datetime.datetime.now().date().strftime("%d-%m-%Y")))
+						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", name=name, appointments=appointments, date=datetime.datetime.now().date().strftime("%d-%m-%Y"), inpatients = docs["inpatients"]))
 						resp.set_cookie("id", docs['_id'])
+						new_appointments = get_pickle("new_appointments")
+						new_appointments[docs["_id"]] = []
+						save_pickle("new_appointments", new_appointments)
+						logged_in = get_pickle("logged_in")
+						logged_in[docs["_id"]] = True
+						save_pickle("logged_in", logged_in)
+						print("logged in: ", logged_in)
 					elif(int(docs["flag"]) == 2):
 						# appointments = sorted_appointments_name(docs["_id"])
 						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", name=docs["firstname"] + " " + docs["lastname"], appointments=docs["appointments"], image=docs["image"]))
@@ -279,6 +300,14 @@ def login():
 @app.route('/logout', methods = ["GET"])
 def logout():
 
+	_id = request.cookies.get("id")
+	collection = db["users"]
+	doc = collection.find_one({"_id": _id}, {"flag": 1})
+	if(int(doc["flag"]) == 1):
+		logged_in = get_pickle("logged_in")
+		logged_in[doc["_id"]] = True
+		save_pickle("logged_in", logged_in)	
+		print("logged in: ", logged_in)
 	resp = redirect(url_for("homepage"))
 	resp.set_cookie("id", "")
 				
@@ -477,7 +506,17 @@ def book_appointment():
 
 		collection.update_one( {"_id": doctor_id}, {"$set": {'appointments': appointments}}, upsert=False )
 		
-
+		# if the appointment is of today and the doctor has already logged in then add that appointment to new_appointments so that it can update with the view asynchronously
+		today = datetime.datetime.now().date().strftime("%m/%d/%Y")
+		if(today == date):
+			logged_in = get_pickle("logged_in")
+			print(logged_in)
+			if(logged_in[doctor_id]):
+				new_appointments = get_pickle("new_appointments")
+				new_appointments[doctor_id].append({ time: { "patient_id": patient_id, "patient_name": patient_doc["firstname"] + " " + patient_doc["lastname"], "details": details } })
+				print("new_appointments: ", new_appointments)
+				save_pickle("new_appointments", new_appointments)
+			save_pickle("logged_in", logged_in)
 		# update patients data
 
 		appointments = patient_doc["appointments"]
@@ -759,7 +798,10 @@ def home():
 		flag = int(doc["flag"])
 		if(flag == 1):
 			appointments, name = sorted_appointments_name(doc["_id"])
-			return render_template("1_home.html", name = name, appointments = appointments, date=datetime.datetime.now().date().strftime("%d-%m-%Y"))
+			new_appointments = get_pickle("new_appointments")
+			new_appointments[doc["_id"]] = []
+			save_pickle("new_appointments", new_appointments)
+			return render_template("1_home.html", name = name, appointments = appointments, date=datetime.datetime.now().date().strftime("%d-%m-%Y"), inpatients = doc["inpatients"])
 		elif(flag == 2):
 			return render_template("2_home.html", name = doc["firstname"] + " " + doc["lastname"], image = doc["image"], appointments = doc["appointments"])
 		elif(flag == 4):
@@ -995,12 +1037,135 @@ def add_emergency():
 			specialities = getAllSpecializations()
 			return render_template("4_home.html", specialities=specialities, success = True)
 
+@app.route('/update_appointments')
+def update_appointments():
+	
+	doctor_id = request.cookies.get("id")
+	while(True):
+		try:
+			new_appointments = get_pickle("new_appointments")
+			if(new_appointments[doctor_id]):
+				print("****************************************************")
+				ret = new_appointments[doctor_id]
+				print(ret)
+				print("****************************************************")
+				new_appointments[doctor_id] = []
+				save_pickle("new_appointments", new_appointments)
+				return jsonify(ret)
+		except:
+			continue
+
+@app.route("/doctor_patient", methods = ["GET", "POST"])
+def doctor_patient():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		collection = db["users"]
+		doc = collection.find_one({"_id": _id})
+		if int(doc["flag"]) != 1:
+			return render_template("404.html")
+		else:
+			if request.method == "GET":
+				time = request.args["time"]
+				patient_id = request.args["patient_id"]
+				patient_name = request.args["patient_name"]
+				details = request.args["details"]
+				doctor_name = doc["name"]
+				return render_template("doctor-patient.html", doctor_name = doctor_name, time = time, patient_id = patient_id, patient_name = patient_name, details = details)
+			else:
+				time = request.form["time"]
+				patient_id = request.form["patient_id"]
+				comment = request.form["comment"]
+				submit_type = request.form["submit_type"]
+				date = datetime.datetime.now().date().strftime("%m/%d/%Y")
+				insert_doc = {
+					"patient_id": patient_id,
+					"doctor_id": _id,
+					"date": date,
+					"time": time,
+					"comments": comment
+				}
+				collection = db["consultation_history"]
+				collection.insert_one(insert_doc)
+
+				# remove that appointment from doctor's appointment list
+
+				collection = db["users"]
+				doc = collection.find_one({"_id": _id, "flag": 1})
+				appointments = doc["appointments"]
+				del appointments[date][time]
+				collection.update_one(
+					{"_id": _id}, 
+					{"$set": {'appointments': appointments}}, 
+					upsert=False
+				)
+
+				if(submit_type == "done"):
+					return redirect(url_for('home'))
+				else:
+					# patient is admitted
+
+					# get a free ward 
+					ward_num = get_free_icu_or_ward_number("wards")
+					if(ward_num):
+						ward_num = "ward-" + ward_num
+					
+					if(ward_num == ""):
+						print("no wards empty")
+						return render_template("admit_status.html", status = "Oops! No wards free at the moment", ward_num = "", nurse_name = "", doctor_name = doc["name"])
+
+					# get a nurse
+					nurse_id = gimme_a_nurse()
+
+					patient_doc = db["users"].find_one({"_id": patient_id, "flag": 2}, {"firstname": 1, "lastname": 1})
+					nurse_doc = db["users"].find_one({"_id": nurse_id, "flag": 5})
+					
+					# update that doctors record in DB
+					new_inpatient = {
+						"patient_id": patient_id,
+						"patient_name": patient_doc["firstname"] + " " + patient_doc["lastname"], 
+						"ward_number": ward_num,
+						"nurse_id": nurse_id,
+						"nurse_name": nurse_doc["name"],
+						"date": date,
+						"time": time 
+					}
+
+					inpatients = doc["inpatients"]
+					inpatients.append(new_inpatient)
+					db["users"].update_one(
+						{"_id": _id}, 
+						{"$set": {'inpatients': inpatients}}, 
+						upsert=False
+					)
+
+					# update the nurse's record in DB
+					incharge_patients = nurse_doc["incharge_patients"]
+					incharge_patients[_id] = patient_id
+					db["users"].update_one(
+						{"_id": _id}, 
+						{"$set": {'incharge_patients': incharge_patients}}, 
+						upsert=False
+					)
+
+					return render_template("admit_status.html", status = "Success", patient_name = patient_doc["firstname"] + " " + patient_doc["lastname"], ward_num = ward_num, nurse_name = nurse_doc["name"], doctor_name = doc["name"])
 
 @app.route("/test")
 def test():
-	_id = request.cookies.get("id")
-	appointments, name = sorted_appointments_name(_id)
-	return render_template("1_home.html", name = name, appointments=appointments)
+	# _id = request.cookies.get("id")
+	# appointments, name = sorted_appointments_name(_id)
+	# return render_template("1_home.html", name = name, appointments=appointments)
+
+	return render_template("admit_status.html", status = "Oops", ward_num = "ward-1", nurse_name = "Anne Marie", doctor_name = "Dr. Peter")
 
 if __name__ == '__main__':
+	logged_in = {}
+	with open('logged_in.pickle', 'wb') as handle:
+		pickle.dump(logged_in, handle, protocol=pickle.HIGHEST_PROTOCOL)
+	
+	new_appointments = {}
+	with open('new_appointments.pickle', 'wb') as handle:
+		pickle.dump(new_appointments, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
 	app.run(host="0.0.0.0", port = 5001, debug = True, threaded = True)
