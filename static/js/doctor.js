@@ -58,3 +58,109 @@ function add_to_appointments(arr) {
         }
     }
 }
+
+function handle_inpatients(e) {
+    patient_id = e.children[0].innerHTML;
+    patient_name = e.children[1].innerHTML;
+    date = e.children[2].innerHTML;
+    time = e.children[3].innerHTML;
+    nurse_id = e.children[4].innerHTML;
+    nurse_name = e.children[5].innerHTML;
+    ward_icu_number = e.children[6].innerHTML;
+
+    // console.log(patient_id);
+    // console.log(patient_name);
+    // console.log(date);
+    // console.log(time);
+    // console.log(nurse_id);
+    // console.log(nurse_name);
+    // console.log(ward_icu_number);
+    swal({
+        title: "What next?",
+        text: "1. Discharge\n 2. Shift to ward\n 3.Shift to ICU\n",
+        type: "input",
+        showCancelButton: true,
+        closeOnConfirm: false,
+        inputPlaceholder: "Select an option"
+    }, function (inputValue) {
+        if (inputValue === false) return false;
+        if (inputValue === "") {
+        swal.showInputError("Pls select an option!!");
+        return false
+        }
+        if(inputValue === "1") {
+            $.ajax({
+                type: "GET",
+                url: "/discharge?patient_id=" + patient_id + "&nurse_id=" + nurse_id + "&ward_icu_number=" + ward_icu_number 
+            }).done(function(o) {
+                swal({
+                    title: 'Successful',
+                    text: 'Discharged',
+                    type: 'success'
+                    }, function(){
+                      console.log("success");
+                      window.location.href = "/home";    
+                }); 
+            });  
+        }
+        else if(inputValue === "2") {
+            $.ajax({
+                type: "GET",
+                url: "/to_ward?patient_id=" + patient_id + "&nurse_id=" + nurse_id + "&ward_icu_number=" + ward_icu_number 
+            }).done(function(o) {
+                if(o == "no_wards_free") {
+                    var type_ = "error";
+                    var title_ = "Oops";
+                }
+                else {
+                    var type_ = "success";
+                    var title_ = "Successful";
+                }
+                swal({
+                    title: title_,
+                    text: o,
+                    type: type_
+                    }, function(){
+                      console.log("success");
+                      window.location.href = "/home";    
+                }); 
+            });   
+        }
+        else if(inputValue === "3") {
+            $.ajax({
+                type: "GET",
+                url: "/to_icu?patient_id=" + patient_id + "&nurse_id=" + nurse_id + "&ward_icu_number=" + ward_icu_number 
+            }).done(function(o) {
+                if(o == "no_icu_free") {
+                    var type_ = "error";
+                    var title_ = "Oops";
+                }
+                else {
+                    var type_ = "success";
+                    var title_ = "Successful";
+                }
+                swal({
+                    title: title_,
+                    text: o,
+                    type: type_
+                    }, function(){
+                      console.log("success");
+                      window.location.href = "/home";    
+                }); 
+            });   
+        }
+        else {
+            swal({
+                title: 'Error',
+                text: 'Invalid option',
+                type: 'error'
+                }, function(){
+                  console.log("error");
+                  //window.location.href = "/cancel_appointment";
+              });   
+        }
+        
+    });
+  
+  
+}

@@ -20,6 +20,7 @@ app.secret_key = os.urandom(24) # for session
 # app.register_blueprint(sse, url_prefix='/stream')
 CORS(app)
 
+
 client = MongoClient('localhost', 27017)
 db = client['hms']
 
@@ -202,6 +203,10 @@ def register():
 				"firstname" 		: request.form["firstname"],
 				"lastname"			: request.form["lastname"],
 				"password" 			: cipher_suite.encrypt(request.form["password"].encode()),
+				"height"			: "",
+				"weight"			: "",
+				"bloodType"			: "",
+				"organDonor"		: "NO",
 				"dob"				: request.form["dob"],
 				"gender" 			: request.form["gender"],
 				"phone_number" 		: request.form["contact_no"],
@@ -213,6 +218,25 @@ def register():
 		
 		collection = db['users']
 		collection.insert_one(doc)
+
+		medical_doc = {}
+
+		medical_doc["diabetes"] = "NO"
+		medical_doc["high_blood_pressure"] = "NO"
+		medical_doc["bad_cholestrol"] = "NO"
+		medical_doc["stroke"] = "NO"
+		medical_doc["circulation_problem"] = "NO"
+		medical_doc["bleeding_disorder"] = "NO"
+		medical_doc["cancer"] = "NO"
+		medical_doc["respiratory_problem"] = "NO"
+		medical_doc["rhueumatic_fever"] = "NO"
+		medical_doc["kidney_problems"] = "NO"
+		medical_doc["thyroid_problems"] = "NO"
+		medical_doc["hiv"] = "NO"
+		medical_doc["medical_conditions"] = []
+		medical_doc["_id"] = request.form["username"]
+
+		db["medical_details"].insert_one(medical_doc)
 		
 		# return "Registered successfully"
 		resp = make_response(render_template(str(2) + "_home.html", name = doc['firstname'] + " " + doc['lastname'], appointments=doc["appointments"], image = doc['image']))
@@ -665,7 +689,7 @@ def ward_info():
 		wards = [1] * int(num_wards) 
 
 		toInsert = {
-			"_id": "wards",
+			"_id": "ward",
 			"availability": wards
 		}
 
@@ -834,7 +858,7 @@ def gimme_a_ward_number():
 		if int(doc["flag"]) != 4:
 			return render_template("404.html")
 		else:
-			ward_num = get_free_icu_or_ward_number("wards")
+			ward_num = get_free_icu_or_ward_number("ward")
 			if(ward_num):
 				return "ward-" + ward_num
 			return ward_num
@@ -1107,7 +1131,7 @@ def doctor_patient():
 					# patient is admitted
 
 					# get a free ward 
-					ward_num = get_free_icu_or_ward_number("wards")
+					ward_num = get_free_icu_or_ward_number("ward")
 					if(ward_num):
 						ward_num = "ward-" + ward_num
 					
@@ -1142,22 +1166,367 @@ def doctor_patient():
 
 					# update the nurse's record in DB
 					incharge_patients = nurse_doc["incharge_patients"]
-					incharge_patients[_id] = patient_id
+					incharge_patients[_id+"-"+patient_id] = ward_num
 					db["users"].update_one(
-						{"_id": _id}, 
+						{"_id": nurse_id}, 
 						{"$set": {'incharge_patients': incharge_patients}}, 
 						upsert=False
 					)
 
 					return render_template("admit_status.html", status = "Success", patient_name = patient_doc["firstname"] + " " + patient_doc["lastname"], ward_num = ward_num, nurse_name = nurse_doc["name"], doctor_name = doc["name"])
 
-@app.route("/test")
-def test():
-	# _id = request.cookies.get("id")
-	# appointments, name = sorted_appointments_name(_id)
-	# return render_template("1_home.html", name = name, appointments=appointments)
+@app.route("/discharge", methods = ["GET"])
+def discharge():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		collection = db["users"]
+		doc = collection.find_one({"_id": _id})
+		if int(doc["flag"]) != 1:
+			return render_template("404.html")
+		else:
+			patient_id = request.args["patient_id"]
+			nurse_id = request.args["nurse_id"]
+			place = request.args["ward_icu_number"]
+			ward_icu = place.split("-")[0]
+			ward_icu_number = int(place.split("-")[1]) - 1
 
-	return render_template("admit_status.html", status = "Oops", ward_num = "ward-1", nurse_name = "Anne Marie", doctor_name = "Dr. Peter")
+			# patient_doc = collection.find_one({"_id": patient_id}, {"password": 0, "image": 0})
+
+			# release that icu/ward
+			ward_icu_doc = db["hospital_details"].find_one({"_id": ward_icu})
+			availability = ward_icu_doc["availability"]
+			availability[ward_icu_number] = 1
+
+			db["hospital_details"].update_one(
+				{"_id": ward_icu}, 
+				{"$set": {'availability': availability}}, 
+				upsert=False
+			)
+
+			# delete that entry from the nurse's document ie., nurse is no longer incharge of that patient
+			nurse_doc = collection.find_one({"_id": nurse_id})
+			incharge_patients = nurse_doc["incharge_patients"]
+
+			del incharge_patients[_id+"-"+patient_id]
+
+			collection.update_one(
+				{"_id": nurse_id}, 
+				{"$set": {'incharge_patients': incharge_patients}}, 
+				upsert=False
+			)
+
+			# the doctor is no longer incharge of the patient
+			inpatients = doc["inpatients"]
+			for i in range(len(inpatients)):
+				if(inpatients[i]["patient_id"] == patient_id):
+					del inpatients[i]
+					break
+			
+			collection.update_one(
+				{"_id": _id}, 
+				{"$set": {'inpatients': inpatients}}, 
+				upsert=False
+			)
+
+			return "success"
+
+@app.route("/to_icu", methods=["GET"])
+def to_icu():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		collection = db["users"]
+		doc = collection.find_one({"_id": _id})
+		if int(doc["flag"]) != 1:
+			return render_template("404.html")
+		else:
+			patient_id = request.args["patient_id"]
+			nurse_id = request.args["nurse_id"]
+			place = request.args["ward_icu_number"]
+			ward_icu = place.split("-")[0]
+			ward_icu_number = int(place.split("-")[1]) - 1
+
+			if(ward_icu == "icu"):
+				return "Already in ICU"
+			else:
+				icu_num = get_free_icu_or_ward_number("icu")
+				if(icu_num == ""):
+					return "no_icu_free"
+
+				icu = "icu-" + icu_num
+
+				# release that ward
+				ward_doc = db["hospital_details"].find_one({"_id": "ward"})
+				availability = ward_doc["availability"]
+				availability[ward_icu_number] = 1
+
+				db["hospital_details"].update_one(
+					{"_id": "ward"}, 
+					{"$set": {'availability': availability}}, 
+					upsert=False
+				)
+
+				# update that inpatient data in doctors data
+				inpatients = doc["inpatients"]
+				for i in range(len(inpatients)):
+					if(inpatients[i]["patient_id"] == patient_id):
+						inpatients[i]["ward_number"] = icu
+						break
+				
+				collection.update_one(
+					{"_id": _id}, 
+					{"$set": {'inpatients': inpatients}}, 
+					upsert=False
+				)
+				return icu
+
+@app.route("/to_ward", methods=["GET"])
+def to_ward():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		collection = db["users"]
+		doc = collection.find_one({"_id": _id})
+		if int(doc["flag"]) != 1:
+			return render_template("404.html")
+		else:
+			patient_id = request.args["patient_id"]
+			nurse_id = request.args["nurse_id"]
+			place = request.args["ward_icu_number"]
+			ward_icu = place.split("-")[0]
+			ward_icu_number = int(place.split("-")[1]) - 1
+
+			if(ward_icu == "ward"):
+				return "Already in Ward"
+			else:
+				ward_num = get_free_icu_or_ward_number("ward")
+				if(ward_num == ""):
+					return "no_wards_free"
+
+				ward = "ward-" + ward_num
+
+				# release that ward
+				ward_doc = db["hospital_details"].find_one({"_id": "icu"})
+				availability = ward_doc["availability"]
+				availability[ward_icu_number] = 1
+
+				db["hospital_details"].update_one(
+					{"_id": "icu"}, 
+					{"$set": {'availability': availability}}, 
+					upsert=False
+				)
+
+				# update that inpatient data in doctors data
+				inpatients = doc["inpatients"]
+				for i in range(len(inpatients)):
+					if(inpatients[i]["patient_id"] == patient_id):
+						inpatients[i]["ward_number"] = ward
+						break
+				
+				collection.update_one(
+					{"_id": _id}, 
+					{"$set": {'inpatients': inpatients}}, 
+					upsert=False
+				)
+				return ward
+
+@app.route("/profile", methods=["GET"])
+def profile():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		doc = db["users"].find_one({"_id": _id})
+		if int(doc["flag"]) != 2:
+			return render_template("404.html")
+		else:
+			name = doc["firstname"] + " " + doc["lastname"]
+			dob = doc["dob"]
+			gender = doc["gender"]
+			phone = doc["phone_number"]
+			email = doc["email_id"]
+			username = _id
+			height = doc["height"]
+			weight = doc["weight"]
+			bloodType = doc["bloodType"]
+			organDonor = doc["organDonor"]
+			
+			medical_doc = db["medical_details"].find_one({"_id": _id})
+			print(medical_doc)
+			ailment1 = medical_doc["diabetes"]
+			ailment2 = medical_doc["high_blood_pressure"]
+			ailment3 = medical_doc["bad_cholestrol"]
+			ailment4 = medical_doc["stroke"]
+			ailment5 = medical_doc["circulation_problem"]
+			ailment6 = medical_doc["bleeding_disorder"]
+			ailment7 = medical_doc["cancer"]
+			ailment8 = medical_doc["respiratory_problem"]
+			ailment9 = medical_doc["rheumatic_fever"]
+			ailment10 = medical_doc["kidney_problems"]
+			ailment11 = medical_doc["thyroid_problems"]
+			ailment12 = medical_doc["hiv"]
+			medical_conditions = medical_doc["medical_conditions"]
+
+			return render_template("prof_comp.html", name = name, dob=dob, gender=gender, phone=phone, email=email, username=username, height=height, weight=weight, bloodType=bloodType, organDonor=organDonor, ailment1=ailment1, ailment2=ailment2, ailment3=ailment3, ailment4=ailment4, ailment5=ailment5, ailment6=ailment6, ailment7=ailment7, ailment8=ailment8, ailment9=ailment9, ailment10=ailment10, ailment11=ailment11, ailment12=ailment12, medical_conditions=medical_conditions)
+
+@app.route("/update_personal_info", methods=["GET"])
+def update_personal_info():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		doc = db["users"].find_one({"_id": _id})
+		if int(doc["flag"]) != 2:
+			return render_template("404.html")
+		else:
+			name = request.args["name"]
+			dob = request.args["dob"]
+			gender = request.args["gender"]
+			phone_number = request.args["phone"]
+			email_id = request.args["email"]
+			height = request.args["height"]
+			weight = request.args["weight"]
+			bloodType = request.args["bloodType"]
+			organDonor = request.args["organDonor"]
+
+			firstname = name.split(" ")[0]
+			try:
+				lastname = name.split(" ")[1]
+			except:
+				lastname = ""
+			
+			updated_doc = {
+				"firstname"			: firstname,
+				"lastname" 			: lastname,
+				"dob" 				: dob,
+				"gender" 			: gender,
+				"phone_number" 		: phone_number,
+				"email_id" 			: email_id,
+				"height" 			: height,
+				"weight" 			: weight,
+				"bloodType" 		: bloodType,
+				"organDonor" 		: organDonor		
+			}
+
+			db["users"].update_one(
+				{"_id": _id}, 
+				{"$set": updated_doc}, 
+				upsert=False
+			)
+			
+			return "Successfully updated details"
+
+@app.route("/update_ailments", methods=["GET"])
+def update_ailments():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		doc = db["users"].find_one({"_id": _id})
+		if int(doc["flag"]) != 2:
+			return render_template("404.html")
+		else:
+			labels = {
+                "ailment1": "diabetes",
+				"ailment2": "high_blood_pressure",
+				"ailment3": "bad_cholestrol",
+				"ailment4": "stroke",
+                "ailment5": "circulation_roblem",
+                "ailment6": "bleeding_disorder",
+                "ailment7": "cancer",
+                "ailment8": "respiratory_problems",
+                "ailment9": "rheumatic_fever",
+                "ailment10": "kidney_problems",
+                "ailment11": "thyroid_problems",
+                "ailment12": "hiv"    
+			}
+			updated_doc = {}
+
+			for arg in request.args:
+				updated_doc[labels[arg]] = request.args[arg]
+			
+			db["medical_details"].update_one(
+				{"_id": _id}, 
+				{"$set": updated_doc}, 
+				upsert=False
+			)
+
+			return "Successfully updated details"
+
+@app.route("/update_medical_conditions", methods=["GET"])
+def update_medical_conditions():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		doc = db["users"].find_one({"_id": _id})
+		if int(doc["flag"]) != 2:
+			return render_template("404.html")
+		else:		
+			index = request.args["index"]
+			condition = request.args["condition"]
+			note = request.args["note"]
+
+			medical_doc = db["medical_details"].find_one({"_id": _id})
+			medical_conditions = medical_doc["medical_conditions"]
+
+			if(index == ""):
+				# new condition
+				medical_conditions.append({"condition": condition, "note": note})
+
+			else:
+				# modify old condition
+				medical_conditions[int(index)] = {"condition": condition, "note": note}
+
+			db["medical_details"].update_one(
+				{"_id": _id}, 
+				{"$set": {"medical_conditions": medical_conditions}}, 
+				upsert=False
+			)
+
+			return "Successfully updated details"
+
+@app.route("/consultation_history")
+def consultation_history():
+	_id = request.cookies.get("id")
+	if _id == "":
+		return render_template("404.html")
+	else:
+		patient_doc = db["users"].find_one({"_id": _id})
+		if int(patient_doc["flag"] != 2):
+			return render_template("404.html")
+		else:
+			patient_name = patient_doc["firstname"] + " " + patient_doc["lastname"]
+
+			docs = db["consultation_history"].find({"patient_id": _id})
+
+			results = []
+
+			for doc in docs:
+				doctor_id = doc["doctor_id"]
+				date = doc["date"]
+				time = doc["time"]
+				comments = doc["comments"]
+
+				doctor_doc = db["users"].find_one({"_id": doctor_id})
+				doctor_name = doctor_doc["name"]
+
+				results.append({
+					"doctor_name": doctor_name,
+					"date": date,
+					"time": time,
+					"comments": comments
+				})
+			
+			results.sort(key = lambda x: x["date"] + x["time"], reverse=True)
+
+			return render_template("consultation_history.html", patient_name = patient_name, data = results)
+
+
 
 if __name__ == '__main__':
 	logged_in = {}
