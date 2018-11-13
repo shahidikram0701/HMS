@@ -297,6 +297,9 @@ def login():
 						new_appointments = get_pickle("new_appointments")
 						new_appointments[docs["_id"]] = []
 						save_pickle("new_appointments", new_appointments)
+						new_emergency = get_pickle("new_emergency")
+						new_emergency[docs["_id"]] = []
+						save_pickle("new_emergency", new_emergency)
 						logged_in = get_pickle("logged_in")
 						logged_in[docs["_id"]] = True
 						save_pickle("logged_in", logged_in)
@@ -305,10 +308,16 @@ def login():
 						# appointments = sorted_appointments_name(docs["_id"])
 						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", name=docs["firstname"] + " " + docs["lastname"], appointments=docs["appointments"], image=docs["image"]))
 						resp.set_cookie("id", docs['_id'])
+					elif(int(docs["flag"]) == 3):
+						resp = make_response(render_template("3_home.html"))
+						resp.set_cookie("id", docs['_id'])
 					else:
 						specialities = getAllSpecializations()
+						all_emergencies = []
+						for doc in db["emergency"].find({}):
+							all_emergencies.append(doc)
 						#return render_template("4_home.html", specialities=specialities)
-						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", specialities=specialities, success=False))
+						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", specialities=specialities, success=False, all_emergencies = all_emergencies))
 						resp.set_cookie("id", docs['_id'])
 				return resp
 
@@ -609,7 +618,11 @@ def add_doctor():
 		}
 
 		collection.insert_one(toInsert)
-		
+
+		logged_in = get_pickle("logged_in")
+		logged_in[username] = False
+		save_pickle("logged_in", logged_in)
+
 		return render_template("3_home.html")
 
 @app.route("/add_nurse", methods = ["GET", "POST"])
@@ -825,12 +838,18 @@ def home():
 			new_appointments = get_pickle("new_appointments")
 			new_appointments[doc["_id"]] = []
 			save_pickle("new_appointments", new_appointments)
+			new_emergency = get_pickle("new_emergency")
+			new_emergency[doc["_id"]] = []
+			save_pickle("new_emergency", new_emergency)
 			return render_template("1_home.html", name = name, appointments = appointments, date=datetime.datetime.now().date().strftime("%d-%m-%Y"), inpatients = doc["inpatients"])
 		elif(flag == 2):
 			return render_template("2_home.html", name = doc["firstname"] + " " + doc["lastname"], image = doc["image"], appointments = doc["appointments"])
 		elif(flag == 4):
 			specialities = getAllSpecializations()
-			return render_template("4_home.html", specialities=specialities, success=False)
+			all_emergencies = []
+			for doc in db["emergency"].find({}):
+				all_emergencies.append(doc)
+			return render_template("4_home.html", specialities=specialities, success=False, all_emergencies = all_emergencies)
 		else:
 			return render_template(str(flag) + "_home.html")
 	else:
@@ -1058,8 +1077,54 @@ def add_emergency():
 			collection = db["emergency"]
 			collection.insert_one(to_insert)
 
+			if(ward_number):
+				ward_or_icu_number = ward_number
+			elif(icu_number):
+				ward_or_icu_number = icu_number
+
+			# if the doctor has already logged in then add that emergency to new_emergency so that it can update with the view asynchronously
+			logged_in = get_pickle("logged_in")
+			print(logged_in)
+			if(logged_in[doctor_id]):
+				new_emergency = get_pickle("new_emergency")
+				new_emergency[doctor_id].append({
+					"patient_id": patient_id,
+					"patient_name": firstname + " " + lastname,
+					"ward_number": ward_or_icu_number,
+					"nurse_id": nurse_id,
+					"nurse_name": db["users"].find_one({"_id": nurse_id})["name"],
+					"date": datetime.datetime.now().date().strftime("%m/%d/%Y"),
+					"time": start
+				})
+				print("new_emergency: ", new_emergency)
+				save_pickle("new_emergency", new_emergency)
+			save_pickle("logged_in", logged_in)
+			
+			inpatients = db["users"].find_one({"_id": doctor_id})["inpatients"]
+			print("//////////////////////////////////////")
+			print(inpatients)
+			print("/////////////////////////////////////")
+			inpatients.append({
+				"patient_id": patient_id,
+				"patient_name": firstname + " " + lastname,
+				"ward_number": ward_or_icu_number,
+				"nurse_id": nurse_id,
+				"nurse_name": db["users"].find_one({"_id": nurse_id})["name"],
+				"date": datetime.datetime.now().date().strftime("%m/%d/%Y"),
+				"time": start
+			})
+			print(inpatients)
+			print("/////////////////////////////////////")
+			db["users"].update_one(
+				{"_id": doctor_id}, 
+				{"$set": {'inpatients': inpatients}}, 
+				upsert=False
+			)
 			specialities = getAllSpecializations()
-			return render_template("4_home.html", specialities=specialities, success = True)
+			all_emergencies = []
+			for doc in db["emergency"].find({}):
+				all_emergencies.append(doc)
+			return render_template("4_home.html", specialities=specialities, success = True, all_emergencies = all_emergencies)
 
 @app.route('/update_appointments')
 def update_appointments():
@@ -1075,6 +1140,24 @@ def update_appointments():
 				print("****************************************************")
 				new_appointments[doctor_id] = []
 				save_pickle("new_appointments", new_appointments)
+				return jsonify(ret)
+		except:
+			continue
+
+@app.route('/update_emergency')
+def update_emergency():
+	
+	doctor_id = request.cookies.get("id")
+	while(True):
+		try:
+			new_emergency = get_pickle("new_emergency")
+			if(new_emergency[doctor_id]):
+				print("****************************************************")
+				ret = new_emergency[doctor_id]
+				print(ret)
+				print("****************************************************")
+				new_emergency[doctor_id] = []
+				save_pickle("new_emergency", new_emergency)
 				return jsonify(ret)
 		except:
 			continue
@@ -1096,7 +1179,17 @@ def doctor_patient():
 				patient_name = request.args["patient_name"]
 				details = request.args["details"]
 				doctor_name = doc["name"]
-				return render_template("doctor-patient.html", doctor_name = doctor_name, time = time, patient_id = patient_id, patient_name = patient_name, details = details)
+
+				about_patient = db["users"].find_one({"_id": patient_id}, {"password": 0, "appointments": 0, "notify": 0})
+				
+				medical_details = db["medical_details"].find_one({"_id": patient_id})
+
+				consultation_history = []
+
+				for doc in db["consultation_history"].find({"patient_id": patient_id}):
+					consultation_history.append(doc)
+
+				return render_template("doctor-patient.html", doctor_name = doctor_name, time = time, patient_id = patient_id, patient_name = patient_name, details = details, about_patient = about_patient, medical_details = medical_details, consultation_history = consultation_history)
 			else:
 				time = request.form["time"]
 				patient_id = request.form["patient_id"]
@@ -1209,7 +1302,10 @@ def discharge():
 			nurse_doc = collection.find_one({"_id": nurse_id})
 			incharge_patients = nurse_doc["incharge_patients"]
 
-			del incharge_patients[_id+"-"+patient_id]
+			if(patient_id.startswith("emergency")):
+				del incharge_patients[patient_id]
+			else:
+				del incharge_patients[_id+"-"+patient_id]
 
 			collection.update_one(
 				{"_id": nurse_id}, 
@@ -1530,11 +1626,22 @@ def consultation_history():
 
 if __name__ == '__main__':
 	logged_in = {}
+	doctor_docs = db["users"].find({"flag": 1}, {"_id": 1})
+	for doc in doctor_docs:
+		logged_in[doc["_id"]] = False
 	with open('logged_in.pickle', 'wb') as handle:
 		pickle.dump(logged_in, handle, protocol=pickle.HIGHEST_PROTOCOL)
 	
 	new_appointments = {}
+	for doc in doctor_docs:
+		new_appointments[doc["_id"]] = {}
 	with open('new_appointments.pickle', 'wb') as handle:
 		pickle.dump(new_appointments, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+	new_emergency = {}
+	for doc in doctor_docs:
+		new_emergency[doc["_id"]] = {}
+	with open('new_emergency.pickle', 'wb') as handle:
+		pickle.dump(new_emergency, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 	app.run(host="0.0.0.0", port = 5001, debug = True, threaded = True)

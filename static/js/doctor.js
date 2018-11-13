@@ -14,17 +14,16 @@ function select(e) {
 
 function init() {
     xhr = new XMLHttpRequest();
+    xhr2 = new XMLHttpRequest();
     // n = 1;
-    function fetch(){
-        console.log("fetch")
-        xhr.onreadystatechange = show;
-        // xhr.timeout = 8000;
-        // xhr.ontimeout = backoff;
+    function fetch_appointments(){
+        console.log("fetch appointments")
+        xhr.onreadystatechange = show_appointments;
         xhr.open("GET", "/update_appointments", true);
         xhr.send();
     }
 
-    function show(){
+    function show_appointments(){
         if(xhr.readyState == 4 && xhr.status == 200){
             //alert("results obtained!");
             // n = 1;
@@ -34,14 +33,28 @@ function init() {
             setTimeout(fetch, 2000);
         }
     }
-    // function backoff(){
-    //     console.log('backoff')
-    //     console.log(n*500)
-    //     setTimeout(fetch, (n * 500));
-    //     n = n * 2;
-    //     //console.log(n);	
-    // }
-    fetch();
+
+    function fetch_emergency(){
+        console.log("fetch emergency")
+        xhr2.onreadystatechange = show_emergency;
+        xhr2.open("GET", "/update_emergency", true);
+        xhr2.send();
+    }
+
+    function show_emergency(){
+        if(xhr2.readyState == 4 && xhr2.status == 200){
+            //alert("results obtained!");
+            // n = 1;
+            var res = JSON.parse(xhr2.responseText);
+            add_to_inpatients(res);
+            swal("EMERGENCY ARRIVED");
+            console.log(res);
+            setTimeout(fetch, 2000);
+        }
+    }
+
+    fetch_appointments();
+    fetch_emergency();
 }
 
 function add_to_appointments(arr) {
@@ -56,6 +69,22 @@ function add_to_appointments(arr) {
             </tr>`
             tbody.innerHTML += s;
         }
+    }
+}
+
+function add_to_inpatients(arr) {
+    var tbody = document.getElementById("myPatient");
+    for(var i = 0; i < arr.length; ++i) {
+        var s = `<tr onclick="handle_inpatients(this)">
+            <td>${arr[i]["patient_id"]}</td>
+            <td>${arr[i]["patient_name"]}</td>
+            <td>${arr[i]["date"]}</td>
+            <td>${arr[i]["time"]}</td>
+            <td>${arr[i]["nurse_id"]}</td>
+            <td>${arr[i]["nurse_name"]}</td>
+            <td>${arr[i]["ward_number"]}</td>
+        </tr>`
+        tbody.innerHTML += s;
     }
 }
 

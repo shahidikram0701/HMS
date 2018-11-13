@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>HMS-Profile Completion</title>
+  
+  
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/3.3.7+1/css/sb-admin-2.min.css'>
+
+      <link rel="stylesheet" href="static/css/prof_comp.css">
+
+  
+</head>
+
+<body>
+
+  <div ng-app="myApp">
+	<div class="container" ng-controller="MedicalProfileCtrl">
+		<div class="row">
+			<div class="col-md-14">
+				<medical-personal-info id="1" model="dataModel.personalInfo"></medical-personal-info>
+			</div>
+			<div class="col-md-14">
+				<medical-conditions id="1" model="dataModel.medicalConditions"></medical-conditions>
+			</div>
+		    <div class="col-md-14">
+				<medical-quest id="1" model="dataModel.medicalQuest"></medical-quest>
+			</div>
+        </div>
+	</div>
+</div>
+</div>
+
+<template id="medicalPersonalInfoTemplate">
+	<div>
+		<div class="panel panel-info" id="personalInfoViewPanel_{{id}}" tabindex="{{$id}}">
+			<div class="panel-heading">
+				<div class="pull-left">
+					<i class="glyphicon glyphicon-user"></i> Personal Information
+				</div>
+				<div class="pull-right">
+					<button type="button" class="btn btn-info btn-xs" data-toggle="modal" 
+									ng-click="showEditModalFn(viewModel, '#personalInfoEditModal_'+id)">
+						<i class="glyphicon glyphicon-edit"></i>
+					</button>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-md-6 col-xs-6">
+						<display-text label="labels.name" model="viewModel.name"></display-text>
+						<display-text label="labels.dob" model="viewModel.dob"></display-text>
+						<display-text label="labels.height" model="viewModel.height"></display-text>
+						<display-text label="labels.hairColor" model="viewModel.hairColor"></display-text>
+						<display-text label="labels.bloodType" model="viewModel.bloodType"></display-text>
+					</div>
+					<div class="col-md-6 col-xs-6">
+						<display-text label="labels.phone" model="viewModel.phone"></display-text>
+						<display-text label="labels.gender" model="viewModel.gender"></display-text>
+						<display-text label="labels.weight" model="viewModel.weight"></display-text>
+						<display-text label="labels.eyeColor" model="viewModel.eyeColor"></display-text>
+						<display-text label="labels.organDonor" model="viewModel.organDonor"></display-text>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="personalInfoEditModal_{{id}}" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title text-primary">Edit Personal Information</h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<form role="form" id="personalInfoEditForm_{{id}}" ng-submit="saveEditFn('#personalInfoEditModal_'+id)">
+								<div class="col-md-6 col-xs-6">
+									<form-input label="labels.name" model="editModel.name"></form-input>
+									<form-input label="labels.dob" model="editModel.dob"></form-input>
+									<form-input label="labels.height" model="editModel.height"></form-input>
+									<form-input label="labels.hairColor" model="editModel.hairColor"></form-input>
+									<form-input label="labels.bloodType" model="editModel.bloodType"></form-input>
+								</div>
+								<div class="col-md-6 col-xs-6">
+									<form-input label="labels.phone" model="editModel.phone" type="tel" pattern="^[2-9]\d{2}-\d{3}-\d{4}$" title='Phone Number Format: XXX-XXX-XXXX'></form-input>
+									<form-input label="labels.gender" model="editModel.gender"></form-input>
+									<form-input label="labels.weight" model="editModel.weight"></form-input>
+									<form-input label="labels.eyeColor" model="editModel.eyeColor"></form-input>
+									<form-input label="labels.organDonor" model="editModel.organDonor"></form-input>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="submit" class="btn btn-success" form="personalInfoEditForm_{{id}}">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="medicalConditionTemplate">
+	<div>
+		<div class="panel panel-red" id="medicalConditionsViewPanel_{{id}}" tabindex="{{$id}}">
+			<div class="panel-heading">
+				<div class="pull-left">
+					<i class="glyphicon glyphicon-plus"></i> Medical Conditions
+				</div>
+				<div class="pull-right">
+					<button type="button" class="btn btn-info btn-xs" data-toggle="modal"
+									ng-click="showEditModalFn(null, null, '#medicalConditionsEditModal_'+id)">
+						<i class="glyphicon glyphicon-plus"></i>
+					</button>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<ul class="list-group">
+				<li class="list-group-item" ng-repeat="medicalCondition in viewModel">
+					<div class="row">
+						<div class="col-md-4">
+							<display-text label="labels.condition" model="medicalCondition.condition"></display-text>
+						</div>
+						<div class="col-md-6">
+							<display-text label="labels.note" model="medicalCondition.note"></display-text>
+						</div>
+						<div class="col-md-2">
+							<button type="button" class="btn btn-info btn-xs" data-toggle="modal" 
+											ng-click="showEditModalFn(medicalCondition, $index, '#medicalConditionsEditModal_'+id)">
+								<i class="glyphicon glyphicon-edit"></i>
+							</button>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<div class="modal fade" id="medicalConditionsEditModal_{{id}}" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title text-primary">{{labels.mode}} Medical Condition</h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<form role="form" id="medicalConditionsEditForm_{{id}}" ng-submit="saveEditFn('#medicalConditionsEditModal_'+id)">
+								<div class="col-md-12 col-xs-12">
+									<div class="form-group input-group">
+										<span class="input-group-addon">Condition</span>
+										<input type="text" class="form-control" ng-model="editModel.condition">
+									</div>
+									<textarea class="form-control" rows="4" placeholder="Enter note..." ng-model="editModel.note"></textarea>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="submit" class="btn btn-success" form="medicalConditionsEditForm_{{id}}">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="medicalQuestTemplate">
+	<div>
+		<div class="panel panel-info" id="medicalQuestViewPanel_{{id}}" tabindex="{{$id}}">
+			<div class="panel-heading">
+				<div class="pull-left">
+					<i class="glyphicon glyphicon-user"></i> Medical Questionnaire
+				</div>
+				<div class="pull-right">
+					<button type="button" class="btn btn-info btn-xs" data-toggle="modal" 
+									ng-click="showEditModalFn(viewModel, '#medicalQuestEditModal_'+id)">
+						<i class="glyphicon glyphicon-edit"></i>
+					</button>
+				</div>
+				<div class="clearfix"></div>
+			</div>
+			<div class="panel-body">
+				<div class="row">
+					<div class="col-md-6 col-xs-6">
+				        <display-text label="labels.ailment1" model="viewModel.ailment1"></display-text>
+	                   <display-text label="labels.ailment2" model="viewModel.ailment2"></display-text>
+	                   <display-text label="labels.ailment3" model="viewModel.ailment3"></display-text>
+                       <display-text label="labels.ailment4" model="viewModel.ailment4"></display-text>
+	                   <display-text label="labels.ailment5" model="viewModel.ailment5"></display-text>
+	                   <display-text label="labels.ailment6" model="viewModel.ailment6"></display-text>
+						
+					</div>
+                    <div class="col-md-6 col-xs-6">
+				        <display-text label="labels.ailment7" model="viewModel.ailment7"></display-text>
+	                   <display-text label="labels.ailment8" model="viewModel.ailment8"></display-text>
+	                   <display-text label="labels.ailment9" model="viewModel.ailment9"></display-text>
+                       <display-text label="labels.ailment10" model="viewModel.ailment10"></display-text>
+	                   <display-text label="labels.ailment11" model="viewModel.ailment11"></display-text>
+	                   <display-text label="labels.ailment12" model="viewModel.ailment12"></display-text>
+						
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal fade" id="medicalQuestEditModal_{{id}}" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title text-primary">Edit Questionnaire Responses</h4>
+					</div>
+					<div class="modal-body">
+						<div class="row">
+							<h4 id="question">Do you suffer from the following ailments?</h4>
+                            <form role="form" id="medicalQuestEditForm_{{id}}" ng-submit="saveEditFn('#medicalQuestEditModal_'+id)">
+								<div class="col-md-4 col-xs-6">
+									<label>
+                                    <input type="checkbox" checklist-value="labels.ailment1" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment1"></input>
+                                    Diabetes
+                                    </label>
+                                    <label>
+                                    <input type="checkbox" checklist-value="labels.ailment2" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment2"></input>
+                                    High Blood Pressure
+                                    </label>
+                                    <label>
+									<input type="checkbox" checklist-value="labels.ailment3" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment3"></input>
+                                    High Cholestrol
+                                    </label>
+									<label>
+									<input type="checkbox" checklist-value="labels.ailment4" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment4"></input>
+                                    Stroke
+                                    </label>
+                                    <label>
+									<input type="checkbox" checklist-value="labels.ailment5" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment5"></input>
+                                    Circulation Problem
+                                    </label>
+								    <label>
+									<input type="checkbox" checklist-value="labels.ailment6" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment6"></input>
+                                    Bleeding Disorder
+                                    </label>
+                                </div>
+                                <div class="col-md-4 col-xs-6">
+									<label>
+                                    <input type="checkbox" checklist-value="labels.ailment7" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment7"></input>
+                                    Cancer
+                                    </label>
+                                    <label>
+                                    <input type="checkbox" checklist-value="labels.ailment8" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment8"></input>
+                                    Respiratory Problems
+                                    </label>
+                                    <label>
+									<input type="checkbox" checklist-value="labels.ailment9" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment9"></input>
+                                    Rheumatic Fever
+                                    </label>
+									<label>
+									<input type="checkbox" checklist-value="labels.ailment10" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment10"></input>
+                                    Kidney Problems
+                                    </label>
+                                    <label>
+									<input type="checkbox" checklist-value="labels.ailment11" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment11"></input>
+                                    Thyroid Problems
+                                    </label>
+								    <label>
+									<input type="checkbox" checklist-value="labels.ailment12" ng-true-value="'YES'" ng-false-value="'NO'" ng-model="editModel.ailment12"></input>
+                                    HIV
+                                    </label>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+						<button type="submit" class="btn btn-success" form="medicalQuestEditForm_{{id}}">Save</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
+<template id="displayTextTemplate">
+	<h4><small>{{label}}</small><br>{{model}}</h4>
+</template>
+
+<template id="formInputTemplate">
+	<div class="form-group">
+		<label>{{label}}</label>
+		<input class="form-control" ng-model="model">
+	</div>
+</template>
+  <script src='https://cdn.jsdelivr.net/jquery/2.2.4/jquery.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.5/angular.min.js'></script>
+<script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/startbootstrap-sb-admin-2/3.3.7+1/js/sb-admin-2.min.js'></script>
+<script src='https://cdn.jsdelivr.net/jquery.metismenu/2.7.0/metisMenu.min.js'></script>
+
+  
+
+    <script  src="static/js/prof_comp.js"></script>
+
+
+
+
+</body>
+
+</html>
