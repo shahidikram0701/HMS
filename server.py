@@ -484,12 +484,14 @@ def date_time_suggestions():
 		if(appointment_time in appointments_date):
 			pass
 		else:
-			time_list.append(appointment_time)
-
+			if(datetime.datetime.strptime(appointment_time, "%H:%M").time() >= datetime.datetime.now().time()):
+				time_list.append(appointment_time)
+			else:
+				pass
 		start_mins += avg_time_per_patient
 
 		if(start_mins >= 60):
-			start_hours += 1
+			start_hours = (start_hours + 1) % 24 
 			start_mins = start_mins % 60
 	
 	return jsonify(time_list)
