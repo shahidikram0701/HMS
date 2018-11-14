@@ -45,7 +45,19 @@
         <h4 class="modal-title">Patient Details</h4>
       </div>
       <div class="modal-body">
-        <p>{{about_patient}}</p>
+          <h1 style="padding: 25px">{{about_patient['firstname'] + " " + about_patient['lastname']}}</h1>
+        <!-- <p>{{about_patient}}</p> -->
+        <img src="{{about_patient['image']}}" alt="" style="border-radius: 50%;padding: 25px;">
+        <p><b>Username:</b> {{about_patient['_id']}}</p>
+        <p><b>Date Of Birth:</b> {{about_patient['dob']}}</p>
+        <p><b>Gender:</b> {{about_patient['gender']}}</p>
+        <p><b>Phone:</b> {{about_patient['phone_number']}}</p>
+        <p><b>E-mail:</b> {{about_patient['email_id']}}</p>
+        <p><b>Height:</b> {{about_patient['height'] + 'cms'}} </p>
+        <p><b>Weight:</b> {{about_patient['weight'] + 'kgs'}} </p>
+        <p><b>Blood Type:</b> {{about_patient['bloodType']}}</p>
+        <p><b>Organ Donor:</b> {{about_patient['organDonor']}}</p>
+        <p></p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -70,8 +82,28 @@
         <h4 class="modal-title">Medical History</h4>
       </div>
       <div class="modal-body">
-        <h1>From database</h1>
-        <h3> {{medical_details}} </h3>
+        <h1>Medical Details</h1>
+        <p><b>Diabetes:</b> {{medical_details['diabetes']}}</p>
+        <p><b>High Blood Pressure:</b> {{medical_details['high_blood_pressure']}}</p>
+        <p><b>Bad Cholestrol:</b> {{medical_details['bad_cholestrol']}}</p>
+        <p><b>Stroke:</b> {{medical_details['stroke']}}</p>
+        <p><b>Circulation Problem:</b> {{medical_details['circulation_problem']}}</p>
+        <p><b>Bleeding disorder:</b> {{medical_details['bleeding_disorder']}}</p>
+        <p><b>Cancer:</b> {{medical_details['cancer']}}</p>
+        <p><b>Respiratory Problem:</b> {{medical_details['respiratory_problem']}}</p>
+        <p><b>Rheumatic Fever:</b> {{medical_details['rheumatic_fever']}}</p>
+        <p><b>Kidney Problem:</b> {{medical_details['kidney_problems']}}</p>
+        <p><b>Thyroid Problem:</b> {{medical_details['thyroid_problems']}}</p>
+        <p><b>HIV:</b> {{medical_details['hiv']}}</p>
+        
+        <br/>
+        {% for condition in medical_details['medical_conditions'] %}
+          <div style="border: solid black 5px">
+              <h3><b><u>{{condition['condition']}}</u></b></h3>
+              <h4>{{condition['note']}}</h4>
+          </div>
+          <br/>
+        {% endfor %}
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -98,7 +130,20 @@
         <h3 class="modal-title">Consultation History</h3>
       </div>
       <div class="modal-body">
-        <p>{{consultation_history}}</p>
+        {% for i in consultation_history %}
+          <div style="border: solid black 5px">
+            <div style="float:left; margin:2px">
+              {{i['date']}}
+            </div>
+            <div style="float:right; margin:2px">
+              {{i['time']}}
+            </div>
+            <h2>{{i['doctor_name']}}</h2>
+            <h3>{{i['comments']}}</h3>
+          </div>
+          <br/>
+        {% endfor %}
+        <!-- <p>{{consultation_history}}</p> -->
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

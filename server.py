@@ -587,6 +587,7 @@ def add_doctor():
 		check_in_time = request.form['check_in_time']
 		check_out_time = request.form['check_out_time']
 		avg_time_per_patient = request.form['avg_time_per_patient']
+		consultation_fees = request.form["consultation_fees"]
 		qualification = request.form['qualification']
 		specialization = request.form['specialization']
 		achievements = request.form['achievements']
@@ -607,6 +608,7 @@ def add_doctor():
 			"check_in_time": check_in_time,
 			"check_out_time": check_out_time,
 			"avg_time_per_patient": avg_time_per_patient,
+			"consultation_fees": consultation_fees,
 			"qualification": qualification,
 			"specialization": specialization,
 			"achievements": achievements,
@@ -696,6 +698,7 @@ def ward_info():
 
 	else:
 		num_wards = request.form['wards']	
+		ward_fees = request.form['ward_fees']
 
 		collection = db["hospital_details"]
 
@@ -703,7 +706,8 @@ def ward_info():
 
 		toInsert = {
 			"_id": "ward",
-			"availability": wards
+			"availability": wards,
+			"fees": ward_fees
 		}
 
 		collection.insert_one(toInsert)
@@ -718,6 +722,7 @@ def icu_info():
 
 	else:
 		num_icu = request.form['icu']	
+		icu_fees = request.form['icu_fees']
 
 		collection = db["hospital_details"]
 
@@ -725,7 +730,8 @@ def icu_info():
 
 		toInsert = {
 			"_id": "icu",
-			"availability": icu
+			"availability": icu,
+			"fees": icu_fees
 		}
 
 		collection.insert_one(toInsert)
@@ -1187,6 +1193,9 @@ def doctor_patient():
 				consultation_history = []
 
 				for doc in db["consultation_history"].find({"patient_id": patient_id}):
+					d_id = doc['doctor_id']
+					d_name = db['users'].find_one({"_id": d_id}, {"name": 1})['name']
+					doc["doctor_name"] = d_name
 					consultation_history.append(doc)
 
 				return render_template("doctor-patient.html", doctor_name = doctor_name, time = time, patient_id = patient_id, patient_name = patient_name, details = details, about_patient = about_patient, medical_details = medical_details, consultation_history = consultation_history)
