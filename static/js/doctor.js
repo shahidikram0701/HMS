@@ -13,8 +13,10 @@ function select(e) {
 }
 
 function init() {
-    xhr = new XMLHttpRequest();
-    xhr2 = new XMLHttpRequest();
+    xhr = new XMLHttpRequest(); // for checking if new appointment is made
+    xhr2 = new XMLHttpRequest(); // for checking if a new emergency is arrived
+    xhr3 = new XMLHttpRequest(); // for checking if an existing appointment is canceled
+
     // n = 1;
     function fetch_appointments(){
         console.log("fetch appointments")
@@ -24,10 +26,10 @@ function init() {
     }
 
     function show_appointments(){
-        if(xhr.readyState == 4 && xhr.status == 200){
+        if(this.readyState == 4 && this.status == 200){
             //alert("results obtained!");
             // n = 1;
-            var res = JSON.parse(xhr.responseText);
+            var res = JSON.parse(this.responseText);
             add_to_appointments(res);
             console.log(res);
             setTimeout(fetch, 2000);
@@ -42,19 +44,47 @@ function init() {
     }
 
     function show_emergency(){
-        if(xhr2.readyState == 4 && xhr2.status == 200){
+        if(this.readyState == 4 && this.status == 200){
             //alert("results obtained!");
             // n = 1;
-            var res = JSON.parse(xhr2.responseText);
+            var res = JSON.parse(this.responseText);
             add_to_inpatients(res);
             swal("EMERGENCY ARRIVED");
             console.log(res);
-            setTimeout(fetch, 2000);
+            setTimeout(fetch_emergency, 2000);
+        }
+    }
+
+    function check_cancellation() {
+        console.log("check cancellation");
+        xhr3.onreadystatechange = remove_appointment;
+        xhr3.open("GET", "/update_cancelled_appointments", true);
+        xhr3.send();
+    }
+
+    function remove_appointment() {
+        if(this.readyState == 4 && this.status == 200) {
+            var res = JSON.parse(this.responseText);
+            // console.log(res);
+            var all_appointments = document.getElementById("myAppt").children;
+            for(var n = 0; n < res.length; ++n) {
+                for(var i = 0; i < all_appointments.length; ++i) {
+                    if(all_appointments[i].children[0].innerHTML == res[n][1]) {
+                        console.log(all_appointments[i]);
+                        console.log(all_appointments[i].parentNode);
+                        all_appointments[i].parentNode.removeChild(all_appointments[i]);
+                        break;
+                    }
+                }
+            }
+
+            setTimeout(check_cancellation, 2000);
         }
     }
 
     fetch_appointments();
     fetch_emergency();
+    check_cancellation();
 }
 
 function add_to_appointments(arr) {

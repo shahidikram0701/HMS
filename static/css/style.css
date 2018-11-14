@@ -243,7 +243,7 @@ input[type=radio]:checked ~ label{
     text-align: center;
 }
 
-button[type=submit] {
+button {
     width: 30%;
     background: #33ccccd4;
     outline: none;
@@ -357,7 +357,7 @@ h1.header-w3ls {
 copy p {
     font-size: 16px;
 }	
-button[type=submit] {
+button {
     font-size: 17px;
 }
 h2.doctor-list-w3l {
@@ -406,7 +406,7 @@ h2.doctor-list-w3l {
     font-size: 31px;
     padding-bottom: 21px;
 }
-button[type=submit] {
+button {
     font-size: 15px;
 }
 }
@@ -512,7 +512,7 @@ h2.doctor-list-w3l {
 .doctor-form {
     width: 91%;
 }
-button[type=submit] {
+button {
     font-size: 14px;
 }
 }
@@ -526,7 +526,7 @@ h1.header-w3ls {
     flex-direction: column;
 }	
 .gap-top{padding-top:24px;}
-button[type=submit] {
+button {
     padding: 10px 11px;
 }
 }
@@ -562,7 +562,7 @@ h2.doctor-list-w3l {
 h1.header-w3ls {
     padding: 34px 0px 24px;
 }
-button[type=submit] {
+button {
     width: 35%;
 	
 }
@@ -588,7 +588,7 @@ select.form-control, .form-left-to-w3l input[type="text"], .input#datepicker1 {
 select.form-control {
     height: 34px;
 }
-button[type=submit] {
+button {
     width: 40%;
 }
 @media(max-width:320px){

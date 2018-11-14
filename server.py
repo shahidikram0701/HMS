@@ -297,6 +297,9 @@ def login():
 						new_appointments = get_pickle("new_appointments")
 						new_appointments[docs["_id"]] = []
 						save_pickle("new_appointments", new_appointments)
+						cancelled_appointments = get_pickle("cancelled_appointments")
+						cancelled_appointments[docs["_id"]] = []
+						save_pickle("cancelled_appointments", cancelled_appointments)
 						new_emergency = get_pickle("new_emergency")
 						new_emergency[docs["_id"]] = []
 						save_pickle("new_emergency", new_emergency)
@@ -818,6 +821,13 @@ def update_appointment():
 
 	appointments = doctor_doc['appointments']
 
+	logged_in = get_pickle("logged_in")
+	if(logged_in[doctor_id]):
+		if(datetime.datetime.now().date() == datetime.datetime.strptime(date, "%m/%d/%Y").date()):	
+			cancelled_appointments = get_pickle("cancelled_appointments")
+			cancelled_appointments[doctor_id].append([date, time, appointments[date][time]])
+			save_pickle("cancelled_appointments", cancelled_appointments)
+
 	del appointments[date][time]
 	print(appointments)
 
@@ -1148,6 +1158,24 @@ def update_appointments():
 				print("****************************************************")
 				new_appointments[doctor_id] = []
 				save_pickle("new_appointments", new_appointments)
+				return jsonify(ret)
+		except:
+			continue
+
+@app.route('/update_cancelled_appointments')
+def update_cancelled_appointments():
+	
+	doctor_id = request.cookies.get("id")
+	while(True):
+		try:
+			cancelled_appointments = get_pickle("cancelled_appointments")
+			if(cancelled_appointments[doctor_id]):
+				print("****************************************************")
+				ret = cancelled_appointments[doctor_id]
+				print(ret)
+				print("****************************************************")
+				cancelled_appointments[doctor_id] = []
+				save_pickle("cancelled_appointments", cancelled_appointments)
 				return jsonify(ret)
 		except:
 			continue
@@ -1648,6 +1676,12 @@ if __name__ == '__main__':
 		new_appointments[doc["_id"]] = {}
 	with open('new_appointments.pickle', 'wb') as handle:
 		pickle.dump(new_appointments, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+	cancelled_appointments = {}
+	for doc in doctor_docs:
+		cancelled_appointments[doc["_id"]] = []
+	with open('cancelled_appointments.pickle', 'wb') as handle:
+		pickle.dump(cancelled_appointments, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 	new_emergency = {}
 	for doc in doctor_docs:

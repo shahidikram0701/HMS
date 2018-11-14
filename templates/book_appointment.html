@@ -68,7 +68,9 @@
                     <div class="clear"></div>
                  </div>
             </div>
+
             <div class="btnn">
+               <button onclick="cancel()">Cancel</button>
                <button type="submit">BOOK</button><br>
             </div>
          </form>
@@ -85,6 +87,9 @@
          });
       </script>
       <script>
+        function cancel() {
+            window.location.href = "/home";
+        }
         function suggest_doctors(specialisation){
             //alert(specialisation)
             var xhr = new XMLHttpRequest();
