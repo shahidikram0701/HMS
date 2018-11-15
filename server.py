@@ -229,7 +229,7 @@ def register():
 		medical_doc["bleeding_disorder"] = "NO"
 		medical_doc["cancer"] = "NO"
 		medical_doc["respiratory_problem"] = "NO"
-		medical_doc["rhueumatic_fever"] = "NO"
+		medical_doc["rheumatic_fever"] = "NO"
 		medical_doc["kidney_problems"] = "NO"
 		medical_doc["thyroid_problems"] = "NO"
 		medical_doc["hiv"] = "NO"
@@ -425,11 +425,15 @@ def doctors_speciality_suggestions():
 	doctor_list = []
 	query = {'flag': 1, 'specialization': speciality}
 
-	docs = collection.find(query, {"_id": 1, 'name': 1})
+	docs = collection.find(query, {"_id": 1, 'name': 1, "check_in_time": 1, "check_out_time": 1})
 
+	now = datetime.datetime.now().time()
 	for doc in docs:
-		doctor_list.append(doc)
-
+		check_in_time = datetime.datetime.strptime(doc['check_in_time'], "%H:%M").time()
+		check_out_time = datetime.datetime.strptime(doc['check_out_time'], "%H:%M").time()
+		if(check_in_time <= now < check_out_time):
+			doctor_list.append(doc)
+		
 	print(doctor_list)
 	return jsonify(doctor_list)
 
