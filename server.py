@@ -318,6 +318,8 @@ def login():
 						specialities = getAllSpecializations()
 						all_emergencies = []
 						for doc in db["emergency"].find({}):
+							doc['doctor_name'] = db['users'].find_one({"_id": doc["doctor_id"]}, {"name": 1})['name']
+							doc['nurse_name'] = db['users'].find_one({"_id": doc["nurse_id"]}, {"name": 1})['name']
 							all_emergencies.append(doc)
 						#return render_template("4_home.html", specialities=specialities)
 						resp = make_response(render_template(str(int(docs['flag'])) + "_home.html", specialities=specialities, success=False, all_emergencies = all_emergencies))
@@ -431,7 +433,7 @@ def doctors_speciality_suggestions():
 	for doc in docs:
 		check_in_time = datetime.datetime.strptime(doc['check_in_time'], "%H:%M").time()
 		check_out_time = datetime.datetime.strptime(doc['check_out_time'], "%H:%M").time()
-		if(check_in_time <= now < check_out_time):
+		if(now < check_out_time):
 			doctor_list.append(doc)
 		
 	print(doctor_list)
@@ -746,6 +748,23 @@ def icu_info():
 		collection.insert_one(toInsert)
 		
 		return render_template("3_home.html")
+	
+@app.route("/delete_user", methods = ["GET", "POST"])
+def delete_user():
+	
+	if request.method == "GET":
+		return redirect(url_for("homepage"))
+	
+	else:
+		username = request.form["username"]
+
+		# just delete the user for now
+		# possible modification
+		# 	check if that doctor/nurse is involved with something (i.e., has some pending appointments or nurse has some incharge_patients)
+
+		db["users"].delete_one({"_id": username})
+
+		return render_template("3_home.html")
 
 @app.route("/provide_feedback", methods = ["GET", "POST"])
 def provide_feedback():
@@ -870,6 +889,8 @@ def home():
 			specialities = getAllSpecializations()
 			all_emergencies = []
 			for doc in db["emergency"].find({}):
+				doc['doctor_name'] = db['users'].find_one({"_id": doc["doctor_id"]}, {"name": 1})['name']
+				doc['nurse_name'] = db['users'].find_one({"_id": doc["nurse_id"]}, {"name": 1})['name']
 				all_emergencies.append(doc)
 			return render_template("4_home.html", specialities=specialities, success=False, all_emergencies = all_emergencies)
 		else:
@@ -1145,6 +1166,8 @@ def add_emergency():
 			specialities = getAllSpecializations()
 			all_emergencies = []
 			for doc in db["emergency"].find({}):
+				doc['doctor_name'] = db['users'].find_one({"_id": doc["doctor_id"]}, {"name": 1})['name']
+				doc['nurse_name'] = db['users'].find_one({"_id": doc["nurse_id"]}, {"name": 1})['name']
 				all_emergencies.append(doc)
 			return render_template("4_home.html", specialities=specialities, success = True, all_emergencies = all_emergencies)
 
@@ -1665,6 +1688,9 @@ def consultation_history():
 
 			return render_template("consultation_history.html", patient_name = patient_name, data = results)
 
+@app.route("/test")
+def test():
+	return render_template("standard.html")
 
 
 if __name__ == '__main__':

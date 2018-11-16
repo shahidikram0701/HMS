@@ -27,25 +27,28 @@
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 </head>
 <body>
-	
 		<nav class="navbar navbar-inverse">
 				<div class="container-fluid">
 					<div class="navbar-header">
-					<a class="navbar-brand" href="#">Feedback session</a>
+					<a class="navbar-brand" href="#">Feedback Session</a>
 					</div>
-					<ul class="nav navbar-nav">
-					<li class="active"><a href="/home">Home</a></li>
-					<li><a href="/all_feedbacks">Feedbacks</a>
-					<!-- <li><a href="#">Page 2</a></li> -->
-					</ul>
+					<div class="navbar-header">
+						<a class="navbar-brand" href="/home">Home</a>
+					</div>
+					<div class="navbar-header">
+						<a class="navbar-brand" href="/all_feedbacks">Feedbacks</a>
+					</div>
+				
+				<div>
 					<ul class="nav navbar-nav navbar-right">
 					<li><a href="/logout"><span class="glyphicon glyphicon-user"></span> Log out</a></li>
 					</ul>
 				</div>
 			</nav>
-	
 	<div class="container-contact100">
+			
 		<div class="wrap-contact100">
+				
 			<form action="/provide_feedback" method = "POST" class="contact100-form validate-form">
 				<span class="contact100-form-title">
 					Your Feedback is valuable

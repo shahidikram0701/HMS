@@ -16,7 +16,9 @@
                 $("#ward-form").fadeOut(100);
                 $("#icu-form").fadeOut(100);
                 $("#emergency-form").fadeOut(100);
+                $("#delete-form").fadeOut(100);
 
+                $('#delete-form-link').removeClass('active');
                 $('#emergency-form-link').removeClass('active');
                 $('#nurse-form-link').removeClass('active');
                 $('#ward-form-link').removeClass('active');
@@ -31,7 +33,9 @@
                 $("#ward-form").fadeOut(100);
                 $("#icu-form").fadeOut(100);
                 $("#emergency-form").fadeOut(100);
+                $("#delete-form").fadeOut(100);
 
+                $('#delete-form-link').removeClass('active');
                 $('#emergency-form-link').removeClass('active');
                 $('#doctor-form-link').removeClass('active');
                 $('#ward-form-link').removeClass('active');
@@ -46,7 +50,9 @@
                 $("#nurse-form").fadeOut(100);
                 $("#ward-form").fadeOut(100);
                 $("#icu-form").fadeOut(100);
-                
+                $("#delete-form").fadeOut(100);
+
+                $('#delete-form-link').removeClass('active');
                 $('#doctor-form-link').removeClass('active');
                 $('#nurse-form-link').removeClass('active');
                 $('#ward-form-link').removeClass('active');
@@ -61,7 +67,9 @@
                 $("#doctor-form").fadeOut(100);
                 $("#icu-form").fadeOut(100);
                 $("#emergency-form").fadeOut(100);
+                $("#delete-form").fadeOut(100);
 
+                $('#delete-form-link').removeClass('active');
                 $('#emergency-form-link').removeClass('active');
                 $('#nurse-form-link').removeClass('active');
                 $('#doctor-form-link').removeClass('active');
@@ -76,7 +84,26 @@
                 $("#ward-form").fadeOut(100);
                 $("#doctor-form").fadeOut(100);
                 $("#emergency-form").fadeOut(100);
+                $("#delete-form").fadeOut(100);
 
+                $('#delete-form-link').removeClass('active');
+                $('#emergency-form-link').removeClass('active');
+                $('#nurse-form-link').removeClass('active');
+                $('#ward-form-link').removeClass('active');
+                $('#doctor-form-link').removeClass('active');
+                
+                $(this).addClass('active');
+                e.preventDefault();
+            });
+            $('#delete-form-link').click(function(e) {
+                $("#delete-form").delay(100).fadeIn(100);
+                $("#nurse-form").fadeOut(100);
+                $("#ward-form").fadeOut(100);
+                $("#doctor-form").fadeOut(100);
+                $("#emergency-form").fadeOut(100);
+                $("#icu-form").fadeOut(100);
+
+                $('#icu-form-link').removeClass('active');
                 $('#emergency-form-link').removeClass('active');
                 $('#nurse-form-link').removeClass('active');
                 $('#ward-form-link').removeClass('active');
@@ -113,13 +140,13 @@
                 <div class="panel panel-login">
                     <div class="panel-heading">
                         <div class="row">
-                            <div class="col-xs-3">
+                            <div class="col-xs-2">
                                 <a href="#" class="active" id="doctor-form-link">Doctor</a>
                             </div>
                             <div class="col-xs-2">
                                 <a href="#" id="nurse-form-link">Nurse</a>
                             </div>
-                            <div class="col-xs-3">
+                            <div class="col-xs-2">
                                 <a href="#" id="emergency-form-link">Emergency</a>
                             </div>
                             <div class="col-xs-2">
@@ -127,6 +154,9 @@
                             </div>
                             <div class="col-xs-2">
                                 <a href="#" id="icu-form-link">ICU</a>
+                            </div>
+                            <div class="col-xs-2">
+                                <a href="#" id="delete-form-link">Delete Doctor/Nurse</a>
                             </div>
                         </div>
                         <hr>
@@ -282,6 +312,18 @@
                                         <div class="row">
                                             <div class="col-sm-6 col-sm-offset-3">
                                                 <input type="submit" name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="Add ICU details">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                                <form id="delete-form" action="/delete_user" method="post" role="form" style="display: none;">
+                                    <div class="form-group">
+                                        <input type="username" name="username" id="username" tabindex="1" class="form-control" placeholder="Enter username of the user that you want to remove" value="">
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-sm-6 col-sm-offset-3">
+                                                <input type="submit" name="register-submit" id="register-submit" tabindex="4" class="form-control btn btn-register" value="Delete User">
                                             </div>
                                         </div>
                                     </div>
