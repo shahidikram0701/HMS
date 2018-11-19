@@ -485,7 +485,13 @@ def date_time_suggestions():
 
 	print(appointments_date)
 	
-	while((start_hours < end_hours) or (not((start_hours == end_hours) and (start_mins <= end_mins)))):
+	fl = False
+
+	while((not(fl) and start_hours < end_hours) or (((start_hours == end_hours) and (start_mins < end_mins)))): # should not be there??
+		
+		if(start_hours == end_hours):
+			fl = True
+
 		appointment_time = str(start_hours) + ":" + str(start_mins)
 		print(appointment_time)
 		if(start_mins == 0):
@@ -1690,7 +1696,7 @@ def consultation_history():
 
 @app.route("/test")
 def test():
-	return render_template("standard.html")
+	return render_template("login_final.html")
 
 
 if __name__ == '__main__':

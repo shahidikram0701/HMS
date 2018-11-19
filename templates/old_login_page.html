@@ -1,0 +1,27 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Login</title>
+	</head>
+	<body>
+		<img src="/static/images/hospital.jpeg" alt="HMS" height="50" width="50" float="left" position="relative"></img>
+		<div>
+			<p style="font-size:15px;">HMS</p>
+		</div>
+		<form action="/login" method="post" align="center">
+			<label>Username</label>
+			<input type="text" name="username" id="uname" placeholder="Username please"></input>
+			</br></br>
+			<label>Password</label>
+			<input type="password" name="password" id="pwd" placeholder="Password please"</input>
+			</br></br>
+			<!-- <button id="login" onclick="check()">LogMeIn</button> -->
+			<input type="submit" value="LogMeIn"/> 
+		</form>
+
+		<div>
+			{{error_message}}
+		</div>
+		
+	</body>
+</html>
