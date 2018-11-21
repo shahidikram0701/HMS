@@ -1,6 +1,9 @@
 body {
     /*padding-top: 90px;*/
-    background: url(/static/images/patient.jpg);
+    font-family: Futura, "Helvetica Neue", Helvetica, sans-serif;
+  	background: #B24592;  /* fallback for old browsers */
+  	background: -webkit-linear-gradient(to right, #4DD0E1, #311B92);  /* Chrome 10-25, Safari 5.1-6 */
+  	background: linear-gradient(to right, #4DD0E1, #311B92); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
@@ -9,13 +12,14 @@ body {
     -o-background-size: cover;
     min-height: 100vh;
 }
-/* 
+/*
  * Timeline css
  */
 .main-timeline{
     margin: 20px 0;
     position: relative;
 }
+
 .main-timeline:before{
     content: "";
     display: block;

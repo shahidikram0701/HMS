@@ -9,32 +9,34 @@
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
-</head>
+  <link rel="stylesheet" href="/static/css/patient.css" />
   
+</head>
+
 <body onload="init()">
-    <div class="panel panel-info">
-      <div class="panel-heading" align="center"><h1>Doctor-Patient Portal</h1></div>
-	 </div>
+
+      <div class="panel-heading" align="center" style = "font-size: 4em; padding: 10px; color: white">Doctor-Patient Portal</div>
 
 
-      <div class="panel-body">
- 
-	  	  <img src='/static/images/doctor-patient.jpg' style='position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:-1;'>
 
-<div class="panel panel-primary">
-    <div class="panel-heading">
-         <div class="panel-title pull-left">
-             {{doctor_name}}
+
+
+
+
+<div class="panel panel-primary" style="height: 100%; background-color: transparent; border: 0px">
+    <div class="panel-heading" style="height: 100%; background-color: transparent; border: 0px">
+         <div class="panel-title pull-left" style = "font-size: 2em; border: 2px solid white; padding: 10px" >
+             Doctor:{{doctor_name}}
          </div>
-        <div class="panel-title pull-right">{{patient_name}}</div>
+        <div class="panel-title pull-right" style = "font-size: 2em; border: 2px solid white; padding: 10px">Patient:{{patient_name}}</div>
         <div class="clearfix"></div>
     </div>
 </div>
 
 <div>
-<div class="col-sm-6" align="center">
+<div class="col-sm-10"  style = "width: 100%; display:flex;justify-content: space-between" >
 <!-- Trigger the modal with a button -->
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">About Patient</button>
+<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" >About Patient</button>
 
 <!-- Modal -->
 <div id="myModal" class="modal fade" role="dialog">
@@ -68,8 +70,7 @@
 
   </div>
 </div>
-</div>
-<div class="col-sm-6" align="center">
+
 <!-- Trigger the modal with a button -->
 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal1">Medical History</button>
 
@@ -97,7 +98,7 @@
         <p><b>Kidney Problem:</b> {{medical_details['kidney_problems']}}</p>
         <p><b>Thyroid Problem:</b> {{medical_details['thyroid_problems']}}</p>
         <p><b>HIV:</b> {{medical_details['hiv']}}</p>
-        
+
         <br/>
         {% for condition in medical_details['medical_conditions'] %}
           <div style="border: solid black 5px">
@@ -114,12 +115,10 @@
 
   </div>
 </div>
-</div>
-</div>
 
-<div align="center">
+
 <!-- Trigger the modal with a button -->
-<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2">Consultation History</button>
+<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal2" >Consultation History</button>
 
 <!-- Modal -->
 <div id="myModal2" class="modal fade" role="dialog">
@@ -155,6 +154,7 @@
   </div>
 </div>
 </div>
+
 <br/>
 <br/>
 <br/>
@@ -163,7 +163,7 @@
 <input class="form-control" type="text" name="patient_id" value = "{{patient_id}}" style="display:none">
 <input class="form-control" type="text" name="time" value = "{{time}}" style="display:none">
 <div class="form-group">
-  <label for="comment">Doctor's Remarks:</label>
+  <label id ="jugad" for="comment" style= " font-size: 2em; margin-bottom: 1em; margin-top: -1em" align = "center">Doctor's Remarks:</label>
   <textarea class="form-control" rows="10"  id="comment" name="comment"></textarea>
 </div>
 <br/>
@@ -183,7 +183,7 @@
 
 
 </div>
-</div>
+
 </div>
 
 <script src="/static/js/doctor_patient.js"></script>

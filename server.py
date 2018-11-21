@@ -486,6 +486,12 @@ def date_time_suggestions():
 	print(appointments_date)
 	
 	fl = False
+	date_today = datetime.datetime.now().date()
+	date_appointment = datetime.datetime.strptime(date, "%m/%d/%Y").date()
+
+	if(date_appointment < date_today):
+		return jsonify([])
+
 
 	while((not(fl) and start_hours < end_hours) or (((start_hours == end_hours) and (start_mins < end_mins)))): # should not be there??
 		
@@ -499,10 +505,14 @@ def date_time_suggestions():
 		if(appointment_time in appointments_date):
 			pass
 		else:
-			if(datetime.datetime.strptime(appointment_time, "%H:%M").time() >= datetime.datetime.now().time()):
-				time_list.append(appointment_time)
+			
+			if(date_appointment == date_today):
+				if(datetime.datetime.strptime(appointment_time, "%H:%M").time() >= datetime.datetime.now().time()):
+					time_list.append(appointment_time)
+				else:
+					pass
 			else:
-				pass
+				time_list.append(appointment_time)
 		start_mins += avg_time_per_patient
 
 		if(start_mins >= 60):
@@ -826,7 +836,27 @@ def cancel_appointment():
 	collection = db["users"]
 	doc = collection.find_one({"_id": request.cookies.get("id")}, {"appointments": 1})
 
-	return render_template("cancel_appointment.html", appointments = doc["appointments"])
+	appointments = {}
+
+	today_date = datetime.datetime.now().date()
+	today_time = datetime.datetime.now().time()
+
+	for date in doc["appointments"]:
+		appointment_date = datetime.datetime.strptime(date, "%m/%d/%Y").date()
+		if(appointment_date < today_date):
+			pass
+		elif(appointment_date > today_date):
+			appointments[date] = doc['appointments'][date]
+		else:
+			a = {}
+			for time in doc['appointments'][date]:
+				appointment_time = datetime.datetime.strptime(time, "%H:%M").time()
+				if(appointment_time > today_time):
+					a[time] = doc['appointments'][date][time]
+			if(a):
+				appointments[date] = a
+
+	return render_template("cancel_appointment.html", appointments = appointments)
 
 @app.route("/update_appointment", methods = ["GET"])
 def update_appointment():
@@ -842,6 +872,19 @@ def update_appointment():
 	print(patient_id)
 	print(date)
 	print(time)
+
+	today_date = datetime.datetime.now().date()
+	today_time = datetime.datetime.now().time()
+
+	cancel_appointment_date = datetime.datetime.strptime(date, "%m/%d/%Y").date() 
+	cancel_appointment_time = datetime.datetime.strptime(time, "%H:%M").time()
+
+	if(cancel_appointment_date < today_date):
+		return "no"
+	elif(cancel_appointment_date == today_date):
+		if(cancel_appointment_time <= today_time):
+			return "no"
+	
 
 	collection = db["users"]
 
@@ -1257,8 +1300,11 @@ def doctor_patient():
 
 				for doc in db["consultation_history"].find({"patient_id": patient_id}):
 					d_id = doc['doctor_id']
-					d_name = db['users'].find_one({"_id": d_id}, {"name": 1})['name']
-					doc["doctor_name"] = d_name
+					try:
+						d_name = db['users'].find_one({"_id": d_id}, {"name": 1})['name']
+						doc["doctor_name"] = d_name
+					except:
+						doc["doctor_name"] = d_id + " (This doctor isn't a staff member anymore)"
 					consultation_history.append(doc)
 
 				return render_template("doctor-patient.html", doctor_name = doctor_name, time = time, patient_id = patient_id, patient_name = patient_name, details = details, about_patient = about_patient, medical_details = medical_details, consultation_history = consultation_history)
@@ -1679,17 +1725,23 @@ def consultation_history():
 				date = doc["date"]
 				time = doc["time"]
 				comments = doc["comments"]
+				try:
+					doctor_doc = db["users"].find_one({"_id": doctor_id})
+					doctor_name = doctor_doc["name"]
 
-				doctor_doc = db["users"].find_one({"_id": doctor_id})
-				doctor_name = doctor_doc["name"]
-
-				results.append({
-					"doctor_name": doctor_name,
-					"date": date,
-					"time": time,
-					"comments": comments
-				})
-			
+					results.append({
+						"doctor_name": doctor_name,
+						"date": date,
+						"time": time,
+						"comments": comments
+					})
+				except:
+					results.append({
+						"doctor_name": doctor_id + " (This doctor isn't a staff member anymore)",
+						"date": date,
+						"time": time,
+						"comments": comments
+					})
 			results.sort(key = lambda x: x["date"] + x["time"], reverse=True)
 
 			return render_template("consultation_history.html", patient_name = patient_name, data = results)
@@ -1707,18 +1759,21 @@ if __name__ == '__main__':
 	with open('logged_in.pickle', 'wb') as handle:
 		pickle.dump(logged_in, handle, protocol=pickle.HIGHEST_PROTOCOL)
 	
+	doctor_docs = db["users"].find({"flag": 1}, {"_id": 1})
 	new_appointments = {}
 	for doc in doctor_docs:
 		new_appointments[doc["_id"]] = {}
 	with open('new_appointments.pickle', 'wb') as handle:
 		pickle.dump(new_appointments, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+	doctor_docs = db["users"].find({"flag": 1}, {"_id": 1})
 	cancelled_appointments = {}
 	for doc in doctor_docs:
 		cancelled_appointments[doc["_id"]] = []
 	with open('cancelled_appointments.pickle', 'wb') as handle:
 		pickle.dump(cancelled_appointments, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+	doctor_docs = db["users"].find({"flag": 1}, {"_id": 1})
 	new_emergency = {}
 	for doc in doctor_docs:
 		new_emergency[doc["_id"]] = {}

@@ -30,6 +30,7 @@ function init() {
             //alert("results obtained!");
             // n = 1;
             var res = JSON.parse(this.responseText);
+            console.log(res);
             add_to_appointments(res);
             console.log(res);
             setTimeout(fetch, 2000);

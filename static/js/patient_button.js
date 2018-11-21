@@ -17,7 +17,7 @@ class FancyButton extends React.Component {
 		const fancyBackStyle = {
 			transform: 'rotateX(90deg) translateZ( ' + this.props.height / 2 + 'px )'
         };
-        
+
         const button_text = this.props.buttonText;
 
 		// SVG attributes
@@ -32,7 +32,7 @@ class FancyButton extends React.Component {
 							<defs>
 								<mask id={maskId}>
 									<rect width="100%" height="100%" fill="#FFFFFF"/>
-									<text className="mask-text button-text" fill="#000000" transform={textTransform} fontFamily="'intro_regular'" fontSize={this.props.fontSize} width="100%" textAnchor="middle" letterSpacing="1">** CLICK **</text>
+									<text className="mask-text button-text" fill="#000000" transform={textTransform} fontFamily="'intro_regular'" fontSize={this.props.fontSize} width="100%" textAnchor="middle" letterSpacing="1">Click Here</text>
 								</mask>
 							</defs>
 							<style>

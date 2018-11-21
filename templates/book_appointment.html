@@ -77,6 +77,23 @@
       </div>
       <!--scripts-->
       <script src='/static/js/jquery-2.2.3.min.js'></script>
+      <script>
+            $(function() {
+                var $dp1 = $("#datepicker1");
+                $dp1.datepicker({
+                    changeYear: true,
+                    changeMonth: true,
+                    minDate:0,
+                    dateFormat: "m/dd/yy",
+                    yearRange: "-100:+20",
+                });
+            });
+        </script>
+        <script>
+            $(function() {
+            $( "#datepicker,#datepicker1,#datepicker2,#datepicker3" ).datepicker();
+            });
+        </script>
       <!--//scripts-->
       <!-- //js -->
       <!-- Calendar -->
@@ -137,6 +154,7 @@
             
         }
       </script>
+        
       <!-- //Calendar -->
    </body>
 </html>

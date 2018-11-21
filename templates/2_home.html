@@ -1,11 +1,10 @@
 <html>
     <head>
-        <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
+        <!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
         <!-- <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
         <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
         <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
         <script src="http://fb.me/JSXTransformer-0.12.2.js"></script> -->
-        
         <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.24.0/babel.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.1.0/react-dom.min.js"></script>
@@ -23,7 +22,7 @@
                 } else {
                     x.className = "topnav";
                 }
-            } 
+            }
         </script>
         <script type="text/babel" src="/static/js/patient_button.js"></script>
         <!-- <script src="/static/js/patient_button.js"></script> -->
@@ -51,40 +50,37 @@
             function click() {
                 alert("clicked");
             }
-            function bill() {
-                alert("Bill");
-            }
         </script>
     </head>
     <body>
-        <div class="topnav" id="myTopnav">
+        <div class="topnav" id="myTopnav" >
             <a href="#" class="active">{{name}}</a>
-            <a href="/profile">Profile</a>
-            <a href="/provide_feedback">Feedback</a>
             <a href="/logout" style= "float: right">Log out</a>
+            <a href="/provide_feedback" style= "float: right">Feedback</a>
+            <a href="/profile" style= "float: right" >Profile</a>
             <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
-        </div> 
-        
+        </div>
+
         <div class="container-fluid">
-            
-            <div class = "row"> 
+
+            <div class = "row">
                 <div class="col-sm-3 col-md-6 col-lg-4">
-                    
+
                     <img src='{{image}}' alt="" class="profile_image">
-                    <a href="/consultation_history"> <div id="button1" style="padding: 50"></div></a> 
+                    <a href="/consultation_history"> <div id="button1" style="padding: 50"></div></a>
                     <a href="/book_appointment"> <div id="button2" style="padding: 50"></div></a>
                     <a href="/cancel_appointment"> <div id="button3" style="padding: 50"></div></a>
-                    <a href="#" onclick="bill()"> <div id="button4" style="padding: 50"></div></a>
+                    <!-- <a href="#"> <div id="button4" style="padding: 50"></div></a> -->
                 </div>
                 <!-- <div class="col-md-12"> -->
                 <br/><br/><br/><br/><br/><br/><br/><br/><br/>
                 {% if appointments|length > 0 %}
-                    <div class="col-sm-6 col-md-6 col-lg-8 scroll-area" style="height: 100%; background-image: url(/static/images/grey.jpeg)" >
+                    <div class="col-sm-6 col-md-6 col-lg-8 scroll-area" style="height: 100%; background-color: transparent" >
                         <br/><br/><br/><br/><br/><br/>
                         <div class="main-timeline " style="padding: 50">
-                            
+
                             {% for i in appointments: %}
-                                
+
                                 {% for j in appointments[i]: %}
                                     <div class="timeline">
                                         <div class="icon"></div>
@@ -106,8 +102,8 @@
                                     </div>
                                 {% endfor %}
                             {% endfor %}
-                            
-                            
+
+
                         </div>
                     </div>
                 {% endif %}
