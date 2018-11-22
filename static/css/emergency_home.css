@@ -17,8 +17,9 @@
 }
 
 body {
-	font-family: sans-serif;
-	background: #f6f9fa;
+	font-family: Futura,"Helvetica Neue", Helvetica, sans-serif;
+	background: -webkit-linear-gradient(to right, #FF7043, #b71c1c);  /* Chrome 10-25, Safari 5.1-6 */
+	background: linear-gradient(to right, #FF7043, #b71c1c); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
 
 h1 {
@@ -34,26 +35,28 @@ a {
 
 /*Fun begins*/
 .tab_container {
-	width: 90%;
+	width: 80%;
 	margin: 0 auto;
 	padding-top: 70px;
 	position: relative;
+    border-radius: 4px;
 }
 
 input, section {
+  font-family: Futura,"Helvetica Neue", Helvetica, sans-serif;
   clear: both;
   padding-top: 10px;
   display: none;
 }
 
 label {
-  font-weight: 700;
+  font-weight: 500;
   font-size: 18px;
   display: block;
   float: left;
   width: 50%;
   padding: 1.5em;
-  color: #757575;
+  color: #37474F;
   cursor: pointer;
   text-decoration: none;
   text-align: center;
@@ -66,7 +69,6 @@ label {
 #tab4:checked ~ #content4,
 #tab5:checked ~ #content5 {
   display: block;
-  padding: 20px;
   background: #fff;
   color: #999;
   border-bottom: 2px solid #f0f0f0;
@@ -142,4 +144,44 @@ label .fa {
 .bigicon {
     font-size: 35px;
     color: #36A0FF;
+}
+
+.container{
+    align-content: space-around;
+}
+
+#details{
+        margin-right: 150px;
+}
+
+.well{
+    background-color: white;
+    border: 0px;
+    margin-bottom: 1em;
+    border-radius: 4px;
+}
+
+#content1{
+    margin-bottom: 4em;
+}
+
+.navbar{
+    border-radius: 0px;
+}
+
+.tab_head{
+    font-size: 1.8em;
+    font-weight:200;
+}
+
+#leg_header{
+    font-weight:700;
+    font-size: 3em;
+    background:linear-gradient(to right, #FFCA28, #BF360C);
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+#submit{
+    text-align: center;
 }

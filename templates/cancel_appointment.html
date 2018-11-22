@@ -3,7 +3,7 @@
    <head>
       <title>Cancel Appointment</title>
       <!-- Meta tags -->
-      <!-- <meta name="viewport" content="width=device-width, initial-scale=1" /> -->
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="keywords" content="Doctor Search Form Responsive Widget, Audio and Video players, Login Form Web Template, Flat Pricing Tables, Flat Drop-Downs, Sign-Up Web Templates, Flat Web Templates, Login Sign-up Responsive Web Template, Smartphone Compatible Web Template, Free Web Designs for Nokia, Samsung, LG, Sony Ericsson, Motorola Web Design"
          />
@@ -26,7 +26,7 @@
       <link href="//fonts.googleapis.com/css?family=Cuprum:400,700" rel="stylesheet">
     </head>
    <body>
-       <!-- <div class="container"> -->
+       <div class="container-fluid" style="margin-left : 0;padding:0">
             <nav class="navbar navbar-inverse">
                 <div class="container-fluid">
                     <div class="navbar-header">
@@ -42,16 +42,16 @@
                     </ul>
                 </div>
             </nav>
-        <!-- </div>  -->
-      <h1 class="header-w3ls">
+        </div>
+      <h1 class="header-w3ls" style = "font-size: 4em; padding: 10px; color: white">
          Cancel appointment
       </h1>
       <div class="doctor-form">
          <!-- <h2 class="doctor-list-w3l">Book your appointment here!</h2> -->
         <div class="main-timeline " style="padding: 50;">
-                            
+
             {% for i in appointments: %}
-                
+
                 {% for j in appointments[i]: %}
                     <div class="timeline">
                         <div class="icon"></div>
@@ -74,7 +74,7 @@
                     </div>
                 {% endfor %}
             {% endfor %}
-        </div>        
+        </div>
       </div>
       <!--scripts-->
       <script src='/static/js/jquery-2.2.3.min.js'></script>
@@ -100,7 +100,7 @@
             var menu = "<select name = 'doctor_id' id = 'selected_doctor' class = 'form-control'> <option value=''>Select Doctor</option>"
 
             for(i = 0; i < myArr.length; ++i) {
-                menu += "<option value = '" + myArr[i]._id + "'>" + myArr[i].name + "</option>"; 
+                menu += "<option value = '" + myArr[i]._id + "'>" + myArr[i].name + "</option>";
             }
 
             menu += "</select>"

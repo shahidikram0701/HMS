@@ -35,14 +35,14 @@
                 </div>
             </nav>
         </div> -->
-      <h1 class="header-w3ls">
+      <h1 class="header-w3ls" style = "font-size: 4em; padding: 10px; color: white">
          Book an Appointment
       </h1>
-      <div class="doctor-form">
+      <div class="doctor-form" style = " background-color:white; border-radius: 10px">
          <h2 class="doctor-list-w3l">Book your appointment here!</h2>
          <form action="/book_appointment" method="post">
             <div class="main">
-               <div class="form-right-to-w3l">
+               <div class="form-right-to-w3l" style = "font: black; width: 100%">
                   <select id = "selected_speciality" name="specialization" class="form-control" onchange = "suggest_doctors(this.value)">
                      <option value="">Select Speciality</option>
                      {% for speciality in specialities: %}
@@ -58,21 +58,22 @@
                   <input  id="datepicker1" name="date" type="text" placeholder="Select Date" required="" onchange = "suggest_time(this.value)">
                </div>
                <div id = "times" class="form-right-to-w3l">
-                  
+
                </div>
             </div>
             <div class="clear"></div>
             <div class="main">
                 <div class="form-left-to-w3l xtend">
-                    <textarea name="details" rows="12" cols="55" placeholder="Please provide necessary details" style="background: none; outline: none; border: 1px solid #fff; color: #fff; padding: 20px;"></textarea>
+                    <textarea name="details" rows="12" cols="55" placeholder="Please provide necessary details" style="background: none; outline: none; border: 1px solid #000; color: #000; padding: 20px;"></textarea>
                     <div class="clear"></div>
                  </div>
             </div>
 
             <div class="btnn">
+              <button type="submit">BOOK</button>
                <button onclick="cancel()">Cancel</button>
-               <button type="submit">BOOK</button><br>
-            </div>
+             <br>
+             </div>
          </form>
       </div>
       <!--scripts-->
@@ -118,7 +119,7 @@
             var menu = "<select name = 'doctor_id' id = 'selected_doctor' class = 'form-control'> <option value=''>Select Doctor</option>"
 
             for(i = 0; i < myArr.length; ++i) {
-                menu += "<option value = '" + myArr[i]._id + "'>" + myArr[i].name + "</option>"; 
+                menu += "<option value = '" + myArr[i]._id + "'>" + myArr[i].name + "</option>";
             }
 
             menu += "</select>"
@@ -137,24 +138,24 @@
 
             console.log(doctor_id);
             console.log(speciality);
-            
+
             xhr.open("GET", "/date_time_suggestions?date=" + date + "&doctor_id=" + doctor_id + "&speciality=" + speciality, false);
             xhr.send();
             var myArr = JSON.parse(xhr.responseText);
 
             times = document.getElementById("times");
             time_menu = "<select name = 'time' class='form-control button'><option value = ''> Select a time </option>"
-            
+
             for(var i = 0; i < myArr.length; ++i) {
-                time_menu += "<option value = '" + myArr[i] + "'>" + myArr[i] + "</option>"; 
+                time_menu += "<option value = '" + myArr[i] + "'>" + myArr[i] + "</option>";
             }
             time_menu += "</select><div class='clear'></div>"
-        
+
             times.innerHTML = time_menu;
-            
+
         }
       </script>
-        
+
       <!-- //Calendar -->
    </body>
 </html>

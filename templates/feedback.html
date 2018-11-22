@@ -22,33 +22,30 @@
 	<link rel="stylesheet" type="text/css" href="/static/feedback_vendor/daterangepicker/daterangepicker.css">
 <!--===============================================================================================-->
 	<link rel="stylesheet" type="text/css" href="/static/css/util.css">
-	<link rel="stylesheet" type="text/css" href="/static/css/feedback_main.css">
+	
 <!--===============================================================================================-->
 <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<link rel="stylesheet" type="text/css" href="/static/css/feedback_main.css">
 </head>
 <body>
 		<nav class="navbar navbar-inverse">
-				<div class="container-fluid">
-					<div class="navbar-header">
-					<a class="navbar-brand" href="#">Feedback Session</a>
+				<div class="container-fluid" style="display: block;margin-top: -4px;margin-bottom: -4px">
+					<div class="navbar-header pull-left">
+					<a class="navbar-brand pull-left" href="#">Feedback Session</a>
 					</div>
-					<div class="navbar-header">
-						<a class="navbar-brand" href="/home">Home</a>
-					</div>
-					<div class="navbar-header">
-						<a class="navbar-brand" href="/all_feedbacks">Feedbacks</a>
-					</div>
-				
-				<div>
-					<ul class="nav navbar-nav navbar-right">
-					<li><a href="/logout"><span class="glyphicon glyphicon-user"></span> Log out</a></li>
-					</ul>
+					
+                    <div id="nav-right">
+                    <ul class="nav navbar-inverse">
+					<li class="active"><a href="/home">Home</a></li>
+                    <li><a href="/all_feedbacks">Feedbacks</a></li>
+					<li><a href="/logout"><span class="glyphicon glyphicon-user"></span>Log out</a></li>
+                    </ul>
+                    </div>
 				</div>
 			</nav>
+	
 	<div class="container-contact100">
-			
 		<div class="wrap-contact100">
-				
 			<form action="/provide_feedback" method = "POST" class="contact100-form validate-form">
 				<span class="contact100-form-title">
 					Your Feedback is valuable
